@@ -1,7 +1,7 @@
 var fs = require('fs-extra');
 var externalPromise = require('threax-npm-tk/externalPromise');
 
-function concat(files, outFile) {
+module.exports = function(files, outFile) {
     var ep = new externalPromise();
 
     var output = files.map((f) => {
