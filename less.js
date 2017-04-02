@@ -1,22 +1,36 @@
-﻿var gulp = require("gulp");
-var less = require('gulp-less');
-var uglifycss = require('gulp-uglifycss');
-var gutil = require('gulp-util');
-var plumber = require('gulp-plumber');
+﻿var less = require('less');
+var fs = require('fs-extra');
+
+var defaultSettings = {
+    encoding: 'utf8',
+    importPaths: [],
+    inFile: null,
+    outFile: null,
+    compress: true,
+}
 
 function compileLess(settings) {
-    return gulp.src(settings.files, { base: settings.baseName })
-           .pipe(plumber(function (error) {
-               gutil.log(gutil.colors.red(error.message));
-               this.emit('end');
-           }))
-           .pipe(less({
-               paths: settings.importPaths
-           }))
-           .pipe(uglifycss({
-               "maxLineLen": 80,
-               "uglyComments": true
-           }))
-           .pipe(gulp.dest(settings.dest));
+    settings.prototype = defaultSettings;
+
+    fs.readFile(settings.inFile, settings.encoding, (err, data) => {
+        if (err) throw err;
+        less.render(data,
+            {
+                paths: settings.importPaths,
+                filename: settings.inFile,
+                compress: settings.compress
+            },
+            (err, output) => {
+                if (err) throw err;
+                fs.ensureFile(settings.outFile, 
+                    (err) => {
+                        if (err) throw err;
+                        fs.writeFile(settings.outFile, output.css, 
+                            (err) => {
+                                if (err) throw err;
+                            });
+                    });
+            });
+    });
 }
 module.exports = compileLess;

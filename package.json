@@ -1,10 +1,11 @@
 {
   "name": "threax-npm-tk",
-  "version": "0.0.4",
+  "version": "0.0.5",
   "author": "Andrew Piper",
   "private": false,
   "files": [
-    "copy.js"
+    "copy.js",
+    "less.js"
   ],
   "dependencies": {
     "fs-extra": "^2.1.2",
