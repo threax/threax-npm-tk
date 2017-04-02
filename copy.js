@@ -1,12 +1,13 @@
 ﻿"use strict";
-var copy = require('copy');
+var fs = require('fs-extra');
 
-module.exports = function (files, outDir) {
+module.exports = function (files, out) {
     copy(
         files,
-        outDir,
-        function (err, file) {
-            if (err) { throw err };
+        out,
+        err => {
+            if (err) return console.error(err)
+            console.log("success!")
         }
     );
 };
