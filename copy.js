@@ -2,7 +2,7 @@
 var fs = require('fs-extra');
 
 module.exports.file = function (fileIn, fileOut) {
-    fs.ensureFile(out, err =>{
+    fs.ensureFile(fileOut, err =>{
         if (err){ return console.error(err); }
         fs.copy(
             fileIn,
