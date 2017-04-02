@@ -10,6 +10,7 @@ var ExternalPromise = (function () {
             this.resolveCb(data);
         };
         ExternalPromise.prototype.reject = function (error) {
+            console.log(error);
             this.rejectCb(error);
         };
         Object.defineProperty(ExternalPromise.prototype, "Promise", {
