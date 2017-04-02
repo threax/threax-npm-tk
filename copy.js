@@ -2,7 +2,7 @@
 var fs = require('fs-extra');
 
 module.exports = function (files, out) {
-    copy(
+    fs.copy(
         files,
         out,
         err => {
