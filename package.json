@@ -1,0 +1,17 @@
+{
+  "name": "threax-npm-tk",
+  "version": "0.0.0",
+  "author": "Andrew Piper",
+  "private": false,
+  "files": [
+    "copy.js"
+  ],
+  "dependencies": {
+    "copy": "^0.3.0",
+    "del": "~2.2.2",
+    "jsns": "^2.0.2"
+  },
+  "devDependencies": {
+    
+  }
+}
