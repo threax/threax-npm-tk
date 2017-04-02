@@ -1,17 +1,21 @@
 ﻿"use strict";
 var fs = require('fs-extra');
+var externalPromise = require('externalPromise');
 
 module.exports.file = function (fileIn, fileOut) {
+    var ep = new externalPromise();
     fs.ensureFile(fileOut, err =>{
-        if (err){ return console.error(err); }
+        if (err){ return ep.reject(err); }
         fs.copy(
             fileIn,
             fileOut,
             err => {
-                if (err){ return console.error(err); }
+                if (err){ return ep.reject(err); }
+                ep.resolve();
             }
         );
     });
+    return ep.Promise;
 };
 
 module.exports.dir = function (files, out) {
