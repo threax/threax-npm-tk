@@ -8,11 +8,15 @@ module.exports = function(files, outFile) {
         return fs.readFileSync(f).toString();
     }).join(';');
 
-    fs.writeFile(outFile, output, 
-    (err) => {
-        if (err){ return ep.reject(err); }
-        ep.resolve();
-    });
+    fs.ensureFile(outFile, 
+        (err) => {
+            if (err){ return ep.reject(err); }
+            fs.writeFile(outFile, output, 
+                (err) => {
+                    if (err){ return ep.reject(err); }
+                    ep.resolve();
+                });
+        });
 
     return ep.Promise;
 }
