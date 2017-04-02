@@ -13,13 +13,15 @@ module.exports.file = function (fileIn, fileOut) {
 };
 
 module.exports.dir = function (files, out) {
-    fs.ensureDir(out);
-    fs.copy(
-        files,
-        out,
-        err => {
-            if (err){ return console.error(err); }
-            console.log("Copied " + files + " to " + out);
-        }
-    );
+    fs.ensureDir(out, err =>{
+        if (err){ return console.error(err); }
+        fs.copy(
+            files,
+            out,
+            err => {
+                if (err){ return console.error(err); }
+                console.log("Copied " + files + " to " + out);
+            }
+        );
+    });
 };
