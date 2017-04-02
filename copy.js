@@ -9,7 +9,6 @@ module.exports.file = function (fileIn, fileOut) {
             fileOut,
             err => {
                 if (err){ return console.error(err); }
-                console.log("Copied " + fileIn + " to " + fileOut);
             }
         );
     });
@@ -23,7 +22,6 @@ module.exports.dir = function (files, out) {
             out,
             err => {
                 if (err){ return console.error(err); }
-                console.log("Copied " + files + " to " + out);
             }
         );
     });
