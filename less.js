@@ -17,8 +17,6 @@ function compileLess(settings) {
     var ep = new externalPromise();
 
     settings.prototype = defaultSettings;
-
-    console.log(settings.input);
     
     //Check for old style and throw errors
     if(settings.inFile){
@@ -41,7 +39,6 @@ function compileLess(settings) {
             for(var i = 0; i < files.length; ++i){
                 var file = files[i];
                 var outFile = path.join(settings.out, file.substr(settings.basePath.length));
-                console.log(outFile);
                 compilePromises.push(compileFile(settings, file, outFile));
             }
 
