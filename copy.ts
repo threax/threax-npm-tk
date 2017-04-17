@@ -1,8 +1,5 @@
 ﻿"use strict";
-//import * as fs from 'fs-extra';
 import {ExternalPromise} from './externalPromise';
-//import {Glob as Glob} from 'glob';
-//import * as path from 'path';
 
 var fs = require('fs-extra');
 // var externalPromise = require('');
@@ -26,7 +23,7 @@ async function copyFile(fileIn, fileOut) {
 };
 module.exports.file = copyFile;
 
-module.exports.dir = function (files, out) {
+module.exports.dir = async function (files, out) {
     var ep = new ExternalPromise();
     fs.ensureDir(out, err =>{
         if (err){ return ep.reject(err); }
@@ -42,7 +39,7 @@ module.exports.dir = function (files, out) {
     return ep.Promise;
 };
 
-module.exports.glob = function (inGlob, basePath, outDir) {
+module.exports.glob = async function (inGlob, basePath, outDir) {
     var ep = new ExternalPromise();
     
     var mg = new Glob(inGlob, {}, async (err, files) =>{
@@ -50,7 +47,6 @@ module.exports.glob = function (inGlob, basePath, outDir) {
             ep.reject(err);
         }
         else if(files && files.length > 0){
-            //var compilePromises = [];
             try{
                 for(var i = 0; i < files.length; ++i){
                     var file = files[i];
@@ -63,14 +59,6 @@ module.exports.glob = function (inGlob, basePath, outDir) {
             catch(err){
                 ep.reject(err);
             }
-
-            // Promise.all(compilePromises)
-            //     .then(r =>{
-            //         ep.resolve();
-            //     })
-            //     .catch(err => {
-            //         ep.reject(err);   
-            //     });
         }
         else{
             ep.resolve();

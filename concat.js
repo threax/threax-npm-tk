@@ -1,22 +1,23 @@
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+var externalPromise_1 = require("./externalPromise");
 var fs = require('fs-extra');
-var externalPromise = require('threax-npm-tk/externalPromise');
-
-module.exports = function(files, outFile) {
-    var ep = new externalPromise();
-
-    var output = files.map((f) => {
+module.exports = function (files, outFile) {
+    var ep = new externalPromise_1.ExternalPromise();
+    var output = files.map(function (f) {
         return fs.readFileSync(f).toString();
     }).join(';');
-
-    fs.ensureFile(outFile, 
-        (err) => {
-            if (err){ return ep.reject(err); }
-            fs.writeFile(outFile, output, 
-                (err) => {
-                    if (err){ return ep.reject(err); }
-                    ep.resolve();
-                });
+    fs.ensureFile(outFile, function (err) {
+        if (err) {
+            return ep.reject(err);
+        }
+        fs.writeFile(outFile, output, function (err) {
+            if (err) {
+                return ep.reject(err);
+            }
+            ep.resolve();
         });
-
+    });
     return ep.Promise;
-}
+};
+//# sourceMappingURL=concat.js.map

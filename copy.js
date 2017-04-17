@@ -35,10 +35,7 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
     }
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-//import * as fs from 'fs-extra';
 var externalPromise_1 = require("./externalPromise");
-//import {Glob as Glob} from 'glob';
-//import * as path from 'path';
 var fs = require('fs-extra');
 // var externalPromise = require('');
 var Glob = require("glob").Glob;
@@ -66,64 +63,74 @@ function copyFile(fileIn, fileOut) {
 ;
 module.exports.file = copyFile;
 module.exports.dir = function (files, out) {
-    var ep = new externalPromise_1.ExternalPromise();
-    fs.ensureDir(out, function (err) {
-        if (err) {
-            return ep.reject(err);
-        }
-        fs.copy(files, out, function (err) {
-            if (err) {
-                return ep.reject(err);
-            }
-            ep.resolve();
+    return __awaiter(this, void 0, void 0, function () {
+        var ep;
+        return __generator(this, function (_a) {
+            ep = new externalPromise_1.ExternalPromise();
+            fs.ensureDir(out, function (err) {
+                if (err) {
+                    return ep.reject(err);
+                }
+                fs.copy(files, out, function (err) {
+                    if (err) {
+                        return ep.reject(err);
+                    }
+                    ep.resolve();
+                });
+            });
+            return [2 /*return*/, ep.Promise];
         });
     });
-    return ep.Promise;
 };
 module.exports.glob = function (inGlob, basePath, outDir) {
-    var _this = this;
-    var ep = new externalPromise_1.ExternalPromise();
-    var mg = new Glob(inGlob, {}, function (err, files) { return __awaiter(_this, void 0, void 0, function () {
-        var i, file, outFile, err_1;
+    return __awaiter(this, void 0, void 0, function () {
+        var _this = this;
+        var ep, mg;
         return __generator(this, function (_a) {
-            switch (_a.label) {
-                case 0:
-                    if (!err) return [3 /*break*/, 1];
-                    ep.reject(err);
-                    return [3 /*break*/, 10];
-                case 1:
-                    if (!(files && files.length > 0)) return [3 /*break*/, 9];
-                    _a.label = 2;
-                case 2:
-                    _a.trys.push([2, 7, , 8]);
-                    i = 0;
-                    _a.label = 3;
-                case 3:
-                    if (!(i < files.length)) return [3 /*break*/, 6];
-                    file = files[i];
-                    outFile = path.join(outDir, file.substr(basePath.length));
-                    return [4 /*yield*/, copyFile(file, outFile)];
-                case 4:
-                    _a.sent();
-                    _a.label = 5;
-                case 5:
-                    ++i;
-                    return [3 /*break*/, 3];
-                case 6:
-                    ep.resolve();
-                    return [3 /*break*/, 8];
-                case 7:
-                    err_1 = _a.sent();
-                    ep.reject(err_1);
-                    return [3 /*break*/, 8];
-                case 8: return [3 /*break*/, 10];
-                case 9:
-                    ep.resolve();
-                    _a.label = 10;
-                case 10: return [2 /*return*/];
-            }
+            ep = new externalPromise_1.ExternalPromise();
+            mg = new Glob(inGlob, {}, function (err, files) { return __awaiter(_this, void 0, void 0, function () {
+                var i, file, outFile, err_1;
+                return __generator(this, function (_a) {
+                    switch (_a.label) {
+                        case 0:
+                            if (!err) return [3 /*break*/, 1];
+                            ep.reject(err);
+                            return [3 /*break*/, 10];
+                        case 1:
+                            if (!(files && files.length > 0)) return [3 /*break*/, 9];
+                            _a.label = 2;
+                        case 2:
+                            _a.trys.push([2, 7, , 8]);
+                            i = 0;
+                            _a.label = 3;
+                        case 3:
+                            if (!(i < files.length)) return [3 /*break*/, 6];
+                            file = files[i];
+                            outFile = path.join(outDir, file.substr(basePath.length));
+                            return [4 /*yield*/, copyFile(file, outFile)];
+                        case 4:
+                            _a.sent();
+                            _a.label = 5;
+                        case 5:
+                            ++i;
+                            return [3 /*break*/, 3];
+                        case 6:
+                            ep.resolve();
+                            return [3 /*break*/, 8];
+                        case 7:
+                            err_1 = _a.sent();
+                            ep.reject(err_1);
+                            return [3 /*break*/, 8];
+                        case 8: return [3 /*break*/, 10];
+                        case 9:
+                            ep.resolve();
+                            _a.label = 10;
+                        case 10: return [2 /*return*/];
+                    }
+                });
+            }); });
+            return [2 /*return*/, ep.Promise];
         });
-    }); });
-    return ep.Promise;
+    });
 };
 //# sourceMappingURL=copy.js.map

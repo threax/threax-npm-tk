@@ -6,7 +6,7 @@
   "files": [
     "copy.js",
     "less.js",
-    "tsc.js",
+    "typescript.js",
     "externalPromise.js",
     "concat.js"
   ],
