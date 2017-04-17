@@ -1,13 +1,16 @@
 ﻿var less = require('less');
 var fs = require('fs-extra');
 var externalPromise = require('threax-npm-tk/externalPromise');
+var Glob = require("glob").Glob;
+var path = require('path');
 
 var defaultSettings = {
     encoding: 'utf8',
     importPaths: [],
-    inFile: null,
-    outFile: null,
+    input: null,
+    out: null,
     compress: true,
+    basePath: null,
 }
 
 function compileLess(settings) {
@@ -15,20 +18,66 @@ function compileLess(settings) {
 
     settings.prototype = defaultSettings;
 
-    fs.readFile(settings.inFile, settings.encoding, (err, data) => {
+    console.log(settings.input);
+    
+    //Check for old style and throw errors
+    if(settings.inFile){
+        return ep.reject(new Error("settings.infile is deprecated, please use settings.input and specify a glob when compiling less for " + settings.paths));
+    }
+    if(settings.outFile){
+        return ep.reject(new Error("settings.outFile is deprecated, please use settings.out and settings.basePath when compiling less for " + settings.paths));
+    }
+
+    if(!settings.basePath){
+        return ep.reject(new Error("Cannot find basePath setting when compiling less for " + settings.paths));
+    }
+
+    var mg = new Glob(settings.input, {}, (err, files) =>{
+        if(err){
+            ep.reject(err);
+        }
+        else if(files && files.length > 0){
+            var compilePromises = [];
+            for(var i = 0; i < files.length; ++i){
+                var file = files[i];
+                var outFile = path.join(settings.out, file.substr(settings.basePath.length));
+                console.log(outFile);
+                compilePromises.push(compileFile(settings, file, outFile));
+            }
+
+            Promise.all(compilePromises)
+                .then(r =>{
+                    ep.resolve();
+                })
+                .catch(err => {
+                    ep.reject(err);   
+                });
+        }
+        else{
+            ep.reject(new Error("No files found."));
+        }
+    });
+
+    return ep;
+}
+
+function compileFile(settings, inFile, outFile){
+    var ep = new externalPromise();
+
+    fs.readFile(inFile, settings.encoding, (err, data) => {
         if (err){ return ep.reject(err); }
         less.render(data,
             {
                 paths: settings.importPaths,
-                filename: settings.inFile,
+                filename: inFile,
                 compress: settings.compress
             },
             (err, output) => {
                 if (err){ return ep.reject(err); }
-                fs.ensureFile(settings.outFile, 
+                fs.ensureFile(outFile, 
                     (err) => {
                         if (err){ return ep.reject(err); }
-                        fs.writeFile(settings.outFile, output.css, 
+                        fs.writeFile(outFile, output.css, 
                             (err) => {
                                 if (err){ return ep.reject(err); }
                                 ep.resolve();
@@ -39,4 +88,5 @@ function compileLess(settings) {
 
     return ep.Promise;
 }
+
 module.exports = compileLess;
