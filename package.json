@@ -1,6 +1,6 @@
 {
   "name": "threax-npm-tk",
-  "version": "0.1.6",
+  "version": "0.1.7",
   "author": "Andrew Piper",
   "private": false,
   "files": [
@@ -13,7 +13,8 @@
   "dependencies": {
     "fs-extra": "^2.1.2",
     "jsns": "^2.0.2",
-    "less": "^2.7.2"
+    "less": "^2.7.2",
+    "glob": "^7.1.1"
   },
   "devDependencies": {
     
