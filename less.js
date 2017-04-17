@@ -53,11 +53,11 @@ function compileLess(settings) {
                 });
         }
         else{
-            ep.reject(new Error("No files found."));
+            ep.resolve();
         }
     });
 
-    return ep;
+    return ep.Promise;
 }
 
 function compileFile(settings, inFile, outFile){
