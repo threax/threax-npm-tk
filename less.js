@@ -39,6 +39,8 @@ function compileLess(settings) {
             for(var i = 0; i < files.length; ++i){
                 var file = files[i];
                 var outFile = path.join(settings.out, file.substr(settings.basePath.length));
+                var parsed = path.parse(outFile);
+                outFile = path.join(parsed.dir, parsed.name + ".css");
                 compilePromises.push(compileFile(settings, file, outFile));
             }
 
