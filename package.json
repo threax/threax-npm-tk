@@ -3,13 +3,6 @@
   "version": "2.0.1",
   "author": "Andrew Piper",
   "private": false,
-  "files": [
-    "copy.js",
-    "less.js",
-    "typescript.js",
-    "externalPromise.js",
-    "concat.js"
-  ],
   "dependencies": {
     "fs-extra": "^2.1.2",
     "jsns": "^2.0.2",
