@@ -1,6 +1,6 @@
 ﻿import {ExternalPromise} from './externalPromise';
 
-var less = require('less');
+var lessc = require('less');
 var fs = require('fs-extra');
 var Glob = require("glob").Glob;
 var path = require('path');
@@ -14,7 +14,7 @@ var defaultSettings = {
     basePath: null,
 }
 
-function compileLess(settings) {
+export function compile(settings) {
     var ep = new ExternalPromise();
 
     settings.prototype = defaultSettings;
@@ -66,7 +66,7 @@ function compileFile(settings, inFile, outFile){
 
     fs.readFile(inFile, settings.encoding, (err, data) => {
         if (err){ return ep.reject(err); }
-        less.render(data,
+        lessc.render(data,
             {
                 paths: settings.importPaths,
                 filename: inFile,
@@ -88,5 +88,3 @@ function compileFile(settings, inFile, outFile){
 
     return ep.Promise;
 }
-
-module.exports = compileLess;

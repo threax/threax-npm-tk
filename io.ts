@@ -2,6 +2,25 @@ var fs = require('fs-extra');
 var Glob = require("glob").Glob;
 import {ExternalPromise} from './externalPromise';
 
+interface NodeStats{
+    isFile();
+    isDirectory();
+}
+
+/**
+ * Get the node fsstat results for a path. This will return promise.
+ */
+export function fsstat(path): Promise<NodeStats>{
+    var ep = new ExternalPromise();
+
+    fs.stat(path, (err, stats) =>{
+        if(err){ return ep.reject(err); }
+        ep.resolve(stats);
+    });
+
+    return ep.Promise;
+}
+
 /**
  * Find all files that match the given glob. This will ignore any directories.
  */
@@ -10,15 +29,16 @@ export function globFiles(globStr: string): Promise<string[]>{
 
     var ep = new ExternalPromise();
     
-    var mg = new Glob(globStr, async (err: Error, files: string[]) =>{
+    var mg = new Glob(globStr, {}, async (err: Error, files: string[]) =>{
         if(err){
             ep.reject(err);
         }
         else{
+            var matches = mg.matches;
             var actuallyFiles: string[] = [];
             for(let i = 0; i < files.length; ++i){
                 var file = files[i];
-                if(mg.cache[file] === 'FILE'){
+                if((await fsstat(file)).isFile()){
                     actuallyFiles.push(file);
                 }
             }

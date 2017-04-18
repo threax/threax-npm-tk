@@ -39,29 +39,56 @@ var fs = require('fs-extra');
 var Glob = require("glob").Glob;
 var externalPromise_1 = require("./externalPromise");
 /**
+ * Get the node fsstat results for a path. This will return promise.
+ */
+function fsstat(path) {
+    var ep = new externalPromise_1.ExternalPromise();
+    fs.stat(path, function (err, stats) {
+        if (err) {
+            return ep.reject(err);
+        }
+        ep.resolve(stats);
+    });
+    return ep.Promise;
+}
+exports.fsstat = fsstat;
+/**
  * Find all files that match the given glob. This will ignore any directories.
  */
 function globFiles(globStr) {
     var _this = this;
     globStr = globStr.replace(/\\/g, '/');
     var ep = new externalPromise_1.ExternalPromise();
-    var mg = new Glob(globStr, function (err, files) { return __awaiter(_this, void 0, void 0, function () {
-        var actuallyFiles, i, file;
+    var mg = new Glob(globStr, {}, function (err, files) { return __awaiter(_this, void 0, void 0, function () {
+        var matches, actuallyFiles, i, file;
         return __generator(this, function (_a) {
-            if (err) {
-                ep.reject(err);
-            }
-            else {
-                actuallyFiles = [];
-                for (i = 0; i < files.length; ++i) {
+            switch (_a.label) {
+                case 0:
+                    if (!err) return [3 /*break*/, 1];
+                    ep.reject(err);
+                    return [3 /*break*/, 6];
+                case 1:
+                    matches = mg.matches;
+                    actuallyFiles = [];
+                    i = 0;
+                    _a.label = 2;
+                case 2:
+                    if (!(i < files.length)) return [3 /*break*/, 5];
                     file = files[i];
-                    if (mg.cache[file] === 'FILE') {
+                    return [4 /*yield*/, fsstat(file)];
+                case 3:
+                    if ((_a.sent()).isFile()) {
                         actuallyFiles.push(file);
                     }
-                }
-                ep.resolve(actuallyFiles);
+                    _a.label = 4;
+                case 4:
+                    ++i;
+                    return [3 /*break*/, 2];
+                case 5:
+                    ep.resolve(actuallyFiles);
+                    _a.label = 6;
+                case 6: return [2 /*return*/];
             }
-            return [2 /*return*/];
         });
     }); });
     return ep.Promise;

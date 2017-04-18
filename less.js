@@ -1,7 +1,7 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 var externalPromise_1 = require("./externalPromise");
-var less = require('less');
+var lessc = require('less');
 var fs = require('fs-extra');
 var Glob = require("glob").Glob;
 var path = require('path');
@@ -13,7 +13,7 @@ var defaultSettings = {
     compress: true,
     basePath: null,
 };
-function compileLess(settings) {
+function compile(settings) {
     var ep = new externalPromise_1.ExternalPromise();
     settings.prototype = defaultSettings;
     //Check for old style and throw errors
@@ -53,13 +53,14 @@ function compileLess(settings) {
     });
     return ep.Promise;
 }
+exports.compile = compile;
 function compileFile(settings, inFile, outFile) {
     var ep = new externalPromise_1.ExternalPromise();
     fs.readFile(inFile, settings.encoding, function (err, data) {
         if (err) {
             return ep.reject(err);
         }
-        less.render(data, {
+        lessc.render(data, {
             paths: settings.importPaths,
             filename: inFile,
             compress: settings.compress
@@ -82,5 +83,4 @@ function compileFile(settings, inFile, outFile) {
     });
     return ep.Promise;
 }
-module.exports = compileLess;
 //# sourceMappingURL=less.js.map
