@@ -2,15 +2,27 @@ var fs = require('fs-extra');
 var Glob = require("glob").Glob;
 import {ExternalPromise} from './externalPromise';
 
-export function glob(globStr: string): Promise<string[]>{
+/**
+ * Find all files that match the given glob. This will ignore any directories.
+ */
+export function globFiles(globStr: string): Promise<string[]>{
+    globStr = globStr.replace(/\\/g, '/');
+
     var ep = new ExternalPromise();
     
-    var mg = new Glob(globStr, {}, async (err: Error, files: string[]) =>{
+    var mg = new Glob(globStr, async (err: Error, files: string[]) =>{
         if(err){
             ep.reject(err);
         }
         else{
-            ep.resolve(files);
+            var actuallyFiles: string[] = [];
+            for(let i = 0; i < files.length; ++i){
+                var file = files[i];
+                if(mg.cache[file] === 'FILE'){
+                    actuallyFiles.push(file);
+                }
+            }
+            ep.resolve(actuallyFiles);
         }
     });
 

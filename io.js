@@ -38,23 +38,35 @@ Object.defineProperty(exports, "__esModule", { value: true });
 var fs = require('fs-extra');
 var Glob = require("glob").Glob;
 var externalPromise_1 = require("./externalPromise");
-function glob(globStr) {
+/**
+ * Find all files that match the given glob. This will ignore any directories.
+ */
+function globFiles(globStr) {
     var _this = this;
+    globStr = globStr.replace(/\\/g, '/');
     var ep = new externalPromise_1.ExternalPromise();
-    var mg = new Glob(globStr, {}, function (err, files) { return __awaiter(_this, void 0, void 0, function () {
+    var mg = new Glob(globStr, function (err, files) { return __awaiter(_this, void 0, void 0, function () {
+        var actuallyFiles, i, file;
         return __generator(this, function (_a) {
             if (err) {
                 ep.reject(err);
             }
             else {
-                ep.resolve(files);
+                actuallyFiles = [];
+                for (i = 0; i < files.length; ++i) {
+                    file = files[i];
+                    if (mg.cache[file] === 'FILE') {
+                        actuallyFiles.push(file);
+                    }
+                }
+                ep.resolve(actuallyFiles);
             }
             return [2 /*return*/];
         });
     }); });
     return ep.Promise;
 }
-exports.glob = glob;
+exports.globFiles = globFiles;
 function ensureFile(path) {
     var ep = new externalPromise_1.ExternalPromise();
     fs.ensureFile(path, function (err) {

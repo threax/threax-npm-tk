@@ -74,15 +74,15 @@ module.exports.glob = function (inGlob, basePath, outDir) {
         var files, i, file, outFile;
         return __generator(this, function (_a) {
             switch (_a.label) {
-                case 0: return [4 /*yield*/, io.glob(inGlob)];
+                case 0: return [4 /*yield*/, io.globFiles(inGlob)];
                 case 1:
                     files = _a.sent();
-                    basePath = path.join(basePath, "."); //resolve the path, removes any ../
+                    basePath = path.join(basePath); //resolve the path, removes any ../
                     i = 0;
                     _a.label = 2;
                 case 2:
                     if (!(i < files.length)) return [3 /*break*/, 5];
-                    file = files[i];
+                    file = path.join(files[i]);
                     outFile = path.join(outDir, file.substr(basePath.length));
                     return [4 /*yield*/, copyFile(file, outFile)];
                 case 3:

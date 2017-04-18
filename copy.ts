@@ -16,10 +16,10 @@ module.exports.dir = async function (files, out) {
 };
 
 module.exports.glob = async function (inGlob, basePath, outDir) {
-    var files = await io.glob(inGlob);
-    basePath = path.join(basePath, "."); //resolve the path, removes any ../
+    var files = await io.globFiles(inGlob);
+    basePath = path.join(basePath); //resolve the path, removes any ../
     for(var i = 0; i < files.length; ++i){
-        var file = files[i];
+        var file = path.join(files[i]);
         var outFile = path.join(outDir, file.substr(basePath.length));
         await copyFile(file, outFile);
     }
