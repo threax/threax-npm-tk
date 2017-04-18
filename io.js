@@ -35,65 +35,57 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
     }
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-var io = require("./io");
-var path = require('path');
-function copyFile(fileIn, fileOut) {
-    return __awaiter(this, void 0, void 0, function () {
+var fs = require('fs-extra');
+var Glob = require("glob").Glob;
+var externalPromise_1 = require("./externalPromise");
+function glob(globStr) {
+    var _this = this;
+    var ep = new externalPromise_1.ExternalPromise();
+    var mg = new Glob(globStr, {}, function (err, files) { return __awaiter(_this, void 0, void 0, function () {
         return __generator(this, function (_a) {
-            switch (_a.label) {
-                case 0: return [4 /*yield*/, io.ensureFile(fileOut)];
-                case 1:
-                    _a.sent();
-                    return [4 /*yield*/, io.copy(fileIn, fileOut)];
-                case 2:
-                    _a.sent();
-                    return [2 /*return*/];
+            if (err) {
+                ep.reject(err);
             }
+            else {
+                ep.resolve(files);
+            }
+            return [2 /*return*/];
         });
-    });
+    }); });
+    return ep.Promise;
 }
-;
-module.exports.file = copyFile;
-module.exports.dir = function (files, out) {
-    return __awaiter(this, void 0, void 0, function () {
-        return __generator(this, function (_a) {
-            switch (_a.label) {
-                case 0: return [4 /*yield*/, io.ensureDir(out)];
-                case 1:
-                    _a.sent();
-                    return [4 /*yield*/, io.copy(files, out)];
-                case 2:
-                    _a.sent();
-                    return [2 /*return*/];
-            }
-        });
+exports.glob = glob;
+function ensureFile(path) {
+    var ep = new externalPromise_1.ExternalPromise();
+    fs.ensureFile(path, function (err) {
+        if (err) {
+            return ep.reject(err);
+        }
+        ep.resolve(undefined);
     });
-};
-module.exports.glob = function (inGlob, basePath, outDir) {
-    return __awaiter(this, void 0, void 0, function () {
-        var files, i, file, outFile;
-        return __generator(this, function (_a) {
-            switch (_a.label) {
-                case 0: return [4 /*yield*/, io.glob(inGlob)];
-                case 1:
-                    files = _a.sent();
-                    basePath = path.join(basePath, "."); //resolve the path, removes any ../
-                    i = 0;
-                    _a.label = 2;
-                case 2:
-                    if (!(i < files.length)) return [3 /*break*/, 5];
-                    file = files[i];
-                    outFile = path.join(outDir, file.substr(basePath.length));
-                    return [4 /*yield*/, copyFile(file, outFile)];
-                case 3:
-                    _a.sent();
-                    _a.label = 4;
-                case 4:
-                    ++i;
-                    return [3 /*break*/, 2];
-                case 5: return [2 /*return*/];
-            }
-        });
+    return ep.Promise;
+}
+exports.ensureFile = ensureFile;
+function ensureDir(path) {
+    var ep = new externalPromise_1.ExternalPromise();
+    fs.ensureDir(path, function (err) {
+        if (err) {
+            return ep.reject(err);
+        }
+        ep.resolve(undefined);
     });
-};
-//# sourceMappingURL=copy.js.map
+    return ep.Promise;
+}
+exports.ensureDir = ensureDir;
+function copy(src, dest) {
+    var ep = new externalPromise_1.ExternalPromise();
+    fs.copy(src, dest, function (err) {
+        if (err) {
+            return ep.reject(err);
+        }
+        ep.resolve();
+    });
+    return ep.Promise;
+}
+exports.copy = copy;
+//# sourceMappingURL=io.js.map
