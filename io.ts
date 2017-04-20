@@ -24,12 +24,17 @@ export function fsstat(path): Promise<NodeStats>{
 /**
  * Find all files that match the given glob. This will ignore any directories.
  */
-export function globFiles(globStr: string): Promise<string[]>{
+export function globFiles(globStr: string, ignore?: string | string[]): Promise<string[]>{
     globStr = globStr.replace(/\\/g, '/');
 
     var ep = new ExternalPromise();
+
+    var globOptions: any = {};
+    if(ignore){
+        globOptions.ignore = ignore;
+    }
     
-    var mg = new Glob(globStr, {}, async (err: Error, files: string[]) =>{
+    var mg = new Glob(globStr, globOptions, async (err: Error, files: string[]) =>{
         if(err){
             ep.reject(err);
         }

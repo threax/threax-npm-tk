@@ -37,7 +37,7 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
 Object.defineProperty(exports, "__esModule", { value: true });
 var io = require("./io");
 var fs = require('fs-extra');
-module.exports = function (files, outFile) {
+module.exports = function (files, outFile, ignore) {
     return __awaiter(this, void 0, void 0, function () {
         var ensurePromise, separator, output, i, glob, globbed, j, _a, _b;
         return __generator(this, function (_c) {
@@ -51,7 +51,7 @@ module.exports = function (files, outFile) {
                 case 1:
                     if (!(i < files.length)) return [3 /*break*/, 7];
                     glob = files[i];
-                    return [4 /*yield*/, io.globFiles(glob)];
+                    return [4 /*yield*/, io.globFiles(glob, ignore)];
                 case 2:
                     globbed = _c.sent();
                     j = 0;

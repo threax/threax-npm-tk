@@ -55,11 +55,15 @@ exports.fsstat = fsstat;
 /**
  * Find all files that match the given glob. This will ignore any directories.
  */
-function globFiles(globStr) {
+function globFiles(globStr, ignore) {
     var _this = this;
     globStr = globStr.replace(/\\/g, '/');
     var ep = new externalPromise_1.ExternalPromise();
-    var mg = new Glob(globStr, {}, function (err, files) { return __awaiter(_this, void 0, void 0, function () {
+    var globOptions = {};
+    if (ignore) {
+        globOptions.ignore = ignore;
+    }
+    var mg = new Glob(globStr, globOptions, function (err, files) { return __awaiter(_this, void 0, void 0, function () {
         var matches, actuallyFiles, i, file;
         return __generator(this, function (_a) {
             switch (_a.label) {

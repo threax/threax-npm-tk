@@ -69,12 +69,12 @@ module.exports.dir = function (files, out) {
         });
     });
 };
-module.exports.glob = function (inGlob, basePath, outDir) {
+module.exports.glob = function (inGlob, basePath, outDir, ignore) {
     return __awaiter(this, void 0, void 0, function () {
         var files, i, file, outFile;
         return __generator(this, function (_a) {
             switch (_a.label) {
-                case 0: return [4 /*yield*/, io.globFiles(inGlob)];
+                case 0: return [4 /*yield*/, io.globFiles(inGlob, ignore)];
                 case 1:
                     files = _a.sent();
                     basePath = path.join(basePath); //resolve the path, removes any ../

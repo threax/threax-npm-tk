@@ -15,8 +15,8 @@ module.exports.dir = async function (files, out) {
     await io.copy(files, out);
 };
 
-module.exports.glob = async function (inGlob, basePath, outDir) {
-    var files = await io.globFiles(inGlob);
+module.exports.glob = async function (inGlob: string, basePath: string, outDir: string, ignore?: string | string[]) {
+    var files = await io.globFiles(inGlob, ignore);
     basePath = path.join(basePath); //resolve the path, removes any ../
     for(var i = 0; i < files.length; ++i){
         var file = path.join(files[i]);
