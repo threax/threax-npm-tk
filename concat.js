@@ -63,7 +63,7 @@ module.exports = function (files, outFile, ignore) {
                     return [4 /*yield*/, io.readFile(globbed[j])];
                 case 4:
                     output = _a + (_b + (_c.sent()));
-                    separator = ';';
+                    separator = ';\n';
                     _c.label = 5;
                 case 5:
                     ++j;
