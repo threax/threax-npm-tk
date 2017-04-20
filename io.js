@@ -127,4 +127,26 @@ function copy(src, dest) {
     return ep.Promise;
 }
 exports.copy = copy;
+function readFile(path) {
+    var ep = new externalPromise_1.ExternalPromise();
+    fs.readFile(path, function (err, data) {
+        if (err) {
+            return ep.reject(err);
+        }
+        ep.resolve(data);
+    });
+    return ep.Promise;
+}
+exports.readFile = readFile;
+function writeFile(path, data) {
+    var ep = new externalPromise_1.ExternalPromise();
+    fs.writeFile(path, data, function (err) {
+        if (err) {
+            return ep.reject(err);
+        }
+        ep.resolve();
+    });
+    return ep.Promise;
+}
+exports.writeFile = writeFile;
 //# sourceMappingURL=io.js.map

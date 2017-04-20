@@ -76,3 +76,22 @@ export function copy(src: string, dest: string){
         });
     return ep.Promise;
 }
+
+export function readFile(path: string): Promise<string>{
+    var ep = new ExternalPromise();
+    fs.readFile(path, (err, data) => {
+        if (err){ return ep.reject(err); }
+        ep.resolve(data);
+    });
+    return ep.Promise;
+}
+
+export function writeFile(path: string, data: any){
+    var ep = new ExternalPromise();
+    fs.writeFile(path, data, 
+        (err) => {
+            if (err){ return ep.reject(err); }
+            ep.resolve();
+        });
+    return ep.Promise;
+}

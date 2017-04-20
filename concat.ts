@@ -1,23 +1,23 @@
 import {ExternalPromise} from './externalPromise';
+import * as io from './io';
 
 var fs = require('fs-extra');
 
-module.exports = function(files, outFile) {
-    var ep = new ExternalPromise();
+module.exports = async function(files: string[], outFile: string) {
+    var ensurePromise = io.ensureFile(outFile);
 
-    var output = files.map((f) => {
-        return fs.readFileSync(f).toString();
-    }).join(';');
+    var separator = "";
+    var output = "";
+    for(var i = 0; i < files.length; ++i){
+        var glob = files[i];
+        var globbed = await io.globFiles(glob);
+        for(var j = 0; j < globbed.length; ++j){
+            output += separator + await io.readFile(globbed[j]);
+            separator = ';';
+        }
+    }
 
-    fs.ensureFile(outFile, 
-        (err) => {
-            if (err){ return ep.reject(err); }
-            fs.writeFile(outFile, output, 
-                (err) => {
-                    if (err){ return ep.reject(err); }
-                    ep.resolve();
-                });
-        });
+    await ensurePromise;
 
-    return ep.Promise;
+    await io.writeFile(outFile, output);
 }
