@@ -2,9 +2,26 @@
 
 var exec = require('child_process').exec;
 
-module.exports = function(){
+export interface TypescriptOptions{
+    /**
+     * The folder to use for the tsc working directory. Set this to the directory your tsconfig resides in. 
+     */
+    projectFolder?: string;
+}
+
+interface ExecOptions{
+    cwd?: string;
+}
+
+module.exports = function(options?: TypescriptOptions){
+    var execOptions: ExecOptions = {};
+
+    if(options && options.projectFolder){
+        execOptions.cwd = options.projectFolder;
+    }
+
     var ep = new ExternalPromise();
-    var child = exec('tsc',
+    var child = exec('tsc', execOptions,
         function (error, stdout, stderr) {
             if (stdout) {
                 console.log('tsc: ' + stdout);
