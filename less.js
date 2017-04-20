@@ -26,6 +26,7 @@ function compile(settings) {
     if (!settings.basePath) {
         return ep.reject(new Error("Cannot find basePath setting when compiling less for " + settings.paths));
     }
+    var basePath = path.join(settings.basePath);
     var mg = new Glob(settings.input, {}, function (err, files) {
         if (err) {
             ep.reject(err);
@@ -33,8 +34,8 @@ function compile(settings) {
         else if (files && files.length > 0) {
             var compilePromises = [];
             for (var i = 0; i < files.length; ++i) {
-                var file = files[i];
-                var outFile = path.join(settings.out, file.substr(settings.basePath.length));
+                var file = path.join(files[i]);
+                var outFile = path.join(settings.out, file.substr(basePath.length));
                 var parsed = path.parse(outFile);
                 outFile = path.join(parsed.dir, parsed.name + ".css");
                 compilePromises.push(compileFile(settings, file, outFile));
