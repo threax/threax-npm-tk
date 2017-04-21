@@ -2,7 +2,7 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 var externalPromise_1 = require("./externalPromise");
 var exec = require('child_process').exec;
-module.exports = function (options) {
+function tsc(options) {
     var execOptions = {};
     if (options && options.projectFolder) {
         execOptions.cwd = options.projectFolder;
@@ -24,5 +24,6 @@ module.exports = function (options) {
         }
     });
     return ep.Promise;
-};
+}
+exports.tsc = tsc;
 //# sourceMappingURL=typescript.js.map

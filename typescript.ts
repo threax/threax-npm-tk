@@ -13,14 +13,14 @@ interface ExecOptions{
     cwd?: string;
 }
 
-module.exports = function(options?: TypescriptOptions){
+export function tsc(options?: TypescriptOptions): Promise<void>{
     var execOptions: ExecOptions = {};
 
     if(options && options.projectFolder){
         execOptions.cwd = options.projectFolder;
     }
 
-    var ep = new ExternalPromise();
+    var ep = new ExternalPromise<void>();
     var child = exec('tsc', execOptions,
         function (error, stdout, stderr) {
             if (stdout) {
