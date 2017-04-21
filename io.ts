@@ -82,7 +82,7 @@ export function copy(src: string, dest: string){
     return ep.Promise;
 }
 
-export function readFile(path: string): Promise<string>{
+export function readFile(path: string): Promise<any>{
     var ep = new ExternalPromise();
     fs.readFile(path, (err, data) => {
         if (err){ return ep.reject(err); }
