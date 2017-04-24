@@ -44,6 +44,12 @@ export async function streamLoadedModules(js: string, runners: string[], options
     script.runInContext(context);
 
     var jsns = sandbox.jsns;
+
+    for(let i = 0; i < runners.length; ++i){
+        let runner = runners[i];
+        jsns.run(runner, passedRunnerSource);
+    }
+
     var modules = jsns.createFileFromLoaded(ignoredSources);
     
     if(options.printJsnsDebug === true){

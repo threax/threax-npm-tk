@@ -42,7 +42,7 @@ var util = require('util');
 var passedRunnerSource = "JsnsTools-PassedRunner!!$$##";
 function streamLoadedModules(js, runners, options) {
     return __awaiter(this, void 0, void 0, function () {
-        var ignoredSources, script, sandbox, context, jsns, modules;
+        var ignoredSources, script, sandbox, context, jsns, i, runner, modules;
         return __generator(this, function (_a) {
             if (options === undefined) {
                 options = {};
@@ -59,6 +59,10 @@ function streamLoadedModules(js, runners, options) {
             context = vm.createContext(sandbox);
             script.runInContext(context);
             jsns = sandbox.jsns;
+            for (i = 0; i < runners.length; ++i) {
+                runner = runners[i];
+                jsns.run(runner, passedRunnerSource);
+            }
             modules = jsns.createFileFromLoaded(ignoredSources);
             if (options.printJsnsDebug === true) {
                 jsns.debug();
