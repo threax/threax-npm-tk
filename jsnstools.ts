@@ -69,6 +69,8 @@ export async function saveLoadedModules(src: string, runners: string[], dest: st
 
     var modules = await streamLoadedModules(js, runners, options);
 
+    await io.ensureFile(dest);
+    
     await io.writeFile(dest, modules);
 
     return modules;
