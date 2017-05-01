@@ -88,8 +88,11 @@ function saveLoadedModules(src, runners, dest, options) {
                     return [4 /*yield*/, streamLoadedModules(js, runners, options)];
                 case 2:
                     modules = _b.sent();
-                    return [4 /*yield*/, io.writeFile(dest, modules)];
+                    return [4 /*yield*/, io.ensureFile(dest)];
                 case 3:
+                    _b.sent();
+                    return [4 /*yield*/, io.writeFile(dest, modules)];
+                case 4:
                     _b.sent();
                     return [2 /*return*/, modules];
             }
