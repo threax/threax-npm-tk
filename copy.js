@@ -8,8 +8,8 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 var __generator = (this && this.__generator) || function (thisArg, body) {
-    var _ = { label: 0, sent: function() { if (t[0] & 1) throw t[1]; return t[1]; }, trys: [], ops: [] }, f, y, t;
-    return { next: verb(0), "throw": verb(1), "return": verb(2) };
+    var _ = { label: 0, sent: function() { if (t[0] & 1) throw t[1]; return t[1]; }, trys: [], ops: [] }, f, y, t, g;
+    return g = { next: verb(0), "throw": verb(1), "return": verb(2) }, typeof Symbol === "function" && (g[Symbol.iterator] = function() { return this; }), g;
     function verb(n) { return function (v) { return step([n, v]); }; }
     function step(op) {
         if (f) throw new TypeError("Generator is already executing.");
@@ -37,7 +37,7 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
 Object.defineProperty(exports, "__esModule", { value: true });
 var io = require("./io");
 var path = require('path');
-function copyFile(fileIn, fileOut) {
+function file(fileIn, fileOut) {
     return __awaiter(this, void 0, void 0, function () {
         return __generator(this, function (_a) {
             switch (_a.label) {
@@ -52,9 +52,9 @@ function copyFile(fileIn, fileOut) {
         });
     });
 }
+exports.file = file;
 ;
-module.exports.file = copyFile;
-module.exports.dir = function (files, out) {
+function dir(files, out) {
     return __awaiter(this, void 0, void 0, function () {
         return __generator(this, function (_a) {
             switch (_a.label) {
@@ -68,10 +68,12 @@ module.exports.dir = function (files, out) {
             }
         });
     });
-};
-module.exports.glob = function (inGlob, basePath, outDir, ignore) {
+}
+exports.dir = dir;
+;
+function glob(inGlob, basePath, outDir, ignore) {
     return __awaiter(this, void 0, void 0, function () {
-        var files, i, file, outFile;
+        var files, i, inFile, outFile;
         return __generator(this, function (_a) {
             switch (_a.label) {
                 case 0: return [4 /*yield*/, io.globFiles(inGlob, ignore)];
@@ -82,9 +84,9 @@ module.exports.glob = function (inGlob, basePath, outDir, ignore) {
                     _a.label = 2;
                 case 2:
                     if (!(i < files.length)) return [3 /*break*/, 5];
-                    file = path.join(files[i]);
-                    outFile = path.join(outDir, file.substr(basePath.length));
-                    return [4 /*yield*/, copyFile(file, outFile)];
+                    inFile = path.join(files[i]);
+                    outFile = path.join(outDir, inFile.substr(basePath.length));
+                    return [4 /*yield*/, file(inFile, outFile)];
                 case 3:
                     _a.sent();
                     _a.label = 4;
@@ -95,5 +97,7 @@ module.exports.glob = function (inGlob, basePath, outDir, ignore) {
             }
         });
     });
-};
+}
+exports.glob = glob;
+;
 //# sourceMappingURL=copy.js.map

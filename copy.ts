@@ -4,23 +4,22 @@ import * as io from './io';
 
 var path = require('path');
 
-async function copyFile(fileIn, fileOut) {
+export async function file(fileIn, fileOut) {
     await io.ensureFile(fileOut);
     await io.copy(fileIn, fileOut);
 };
-module.exports.file = copyFile;
 
-module.exports.dir = async function (files, out) {
+export async function dir(files, out) {
     await io.ensureDir(out);
     await io.copy(files, out);
 };
 
-module.exports.glob = async function (inGlob: string, basePath: string, outDir: string, ignore?: string | string[]) {
+export async function glob(inGlob: string, basePath: string, outDir: string, ignore?: string | string[]) {
     var files = await io.globFiles(inGlob, ignore);
     basePath = path.join(basePath); //resolve the path, removes any ../
-    for(var i = 0; i < files.length; ++i){
-        var file = path.join(files[i]);
-        var outFile = path.join(outDir, file.substr(basePath.length));
-        await copyFile(file, outFile);
+    for (var i = 0; i < files.length; ++i) {
+        var inFile = path.join(files[i]);
+        var outFile = path.join(outDir, inFile.substr(basePath.length));
+        await file(inFile, outFile);
     }
 };
