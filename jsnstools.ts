@@ -1,4 +1,3 @@
-/// <reference path="node_modules/jsns/jsns.ts" />
 import * as io from './io';
 
 const vm = require('vm');
