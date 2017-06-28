@@ -38,6 +38,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 var externalPromise_1 = require("./externalPromise");
 var io = require("./io");
 var exec = require('child_process').exec;
+var path = require('path');
 function tsc(options) {
     var execOptions = {};
     if (options && options.projectFolder) {
@@ -68,9 +69,9 @@ exports.tsc = tsc;
  * in your destination config. If you need to have project specific config for one of these properties,
  * supply a glob for it. If you don't supply a glob, the default will be "node_modules\*\*.tsimport"
  */
-function importConfigs(projectConfig, importGlobs) {
+function importConfigs(projectConfig, rootPath, importGlobs) {
     return __awaiter(this, void 0, void 0, function () {
-        var json, imports, i, globs, j, loadedConfig, err_1;
+        var json, imported, imports, i, globs, j, currentGlob, loadedConfig, err_1;
         return __generator(this, function (_a) {
             switch (_a.label) {
                 case 0:
@@ -89,10 +90,13 @@ function importConfigs(projectConfig, importGlobs) {
                     _a.label = 3;
                 case 3:
                     if (!(j < globs.length)) return [3 /*break*/, 6];
-                    return [4 /*yield*/, io.readFile(globs[j])];
+                    currentGlob = globs[j];
+                    return [4 /*yield*/, io.readFile(currentGlob)];
                 case 4:
                     json = _a.sent();
-                    imports.push(JSON.parse(json));
+                    imported = JSON.parse(json);
+                    imported.sourcePath = path.relative(rootPath, path.dirname(currentGlob));
+                    imports.push(imported);
                     _a.label = 5;
                 case 5:
                     ++i;
@@ -151,35 +155,35 @@ function mergeConfigs(src, dest) {
         if (!dest.compilerOptions) {
             dest.compilerOptions = {};
         }
-        mergeCompilerOptions(src.compilerOptions, dest.compilerOptions);
+        mergeCompilerOptions(src.compilerOptions, dest.compilerOptions, src.sourcePath);
     }
     if (src.include) {
         if (!dest.include) {
             dest.include = [];
         }
-        mergePaths(src.include, dest.include);
+        mergePaths(src.include, dest.include, src.sourcePath);
     }
     if (src.exclude) {
         if (!dest.exclude) {
             dest.exclude = [];
         }
-        mergePaths(src.exclude, dest.exclude);
+        mergePaths(src.exclude, dest.exclude, src.sourcePath);
     }
     if (src.files) {
         if (!dest.files) {
             dest.files = [];
         }
-        mergePaths(src.files, dest.files);
+        mergePaths(src.files, dest.files, src.sourcePath);
     }
 }
 function mergeImports(src, dest) {
     mergeConfigs(src, dest);
     //Merge package manager if it is not already set, first one found wins
     if (src.packageManager && !dest.packageManager) {
-        dest.packageManager = src.packageManager;
+        dest.packageManager = path.join(src.sourcePath, src.packageManager);
     }
 }
-function mergeCompilerOptions(src, dest) {
+function mergeCompilerOptions(src, dest, basePath) {
     if (src.paths) {
         if (!dest.paths) {
             dest.paths = {};
@@ -190,13 +194,13 @@ function mergeCompilerOptions(src, dest) {
             if (!destPaths[key]) {
                 destPaths[key] = [];
             }
-            mergePaths(srcPaths[key], destPaths[key]);
+            mergePaths(srcPaths[key], destPaths[key], basePath);
         }
     }
 }
-function mergePaths(src, dest) {
+function mergePaths(src, dest, basePath) {
     for (var i = 0; i < src.length; ++i) {
-        dest.push(src[i]);
+        dest.push(path.join(basePath, src[i]));
     }
 }
 //# sourceMappingURL=typescript.js.map

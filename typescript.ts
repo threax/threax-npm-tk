@@ -2,6 +2,7 @@
 import * as io from './io';
 
 var exec = require('child_process').exec;
+var path = require('path');
 
 export interface TypescriptOptions{
     /**
@@ -78,8 +79,8 @@ export interface TsImport extends TsConfig{
     packageManager?: string;
 
     /**
-     * This is the path that this import was loaded from. All paths in the file
-     * will be relative to this path - the base path.
+     * This is the path that this import was loaded from. This path should be relative
+     * to your project root if you are specifying it manually.
      */
     sourcePath: string;
 }
@@ -90,8 +91,9 @@ export interface TsImport extends TsConfig{
  * in your destination config. If you need to have project specific config for one of these properties, 
  * supply a glob for it. If you don't supply a glob, the default will be "node_modules\*\*.tsimport"
  */
-export async function importConfigs(projectConfig: string, importGlobs?: string[]): Promise<void>{
-    var json;
+export async function importConfigs(projectConfig: string, rootPath: string, importGlobs?: string[]): Promise<void>{
+    var json: string;
+    var imported: TsImport
     if(!importGlobs){
         importGlobs = ["node_modules/*/*.tsimport"] //By default find all tsimport files in a flat structure
     }
@@ -100,8 +102,11 @@ export async function importConfigs(projectConfig: string, importGlobs?: string[
     for(let i = 0; i < importGlobs.length; ++i){
         var globs = await io.globFiles(importGlobs[i])
         for(let j = 0; j < globs.length; ++i){
-            json = await io.readFile(globs[j]);
-            imports.push(JSON.parse(json));
+            let currentGlob = globs[j];
+            json = await io.readFile(currentGlob);
+            imported = JSON.parse(json);
+            imported.sourcePath = path.relative(rootPath, path.dirname(currentGlob));
+            imports.push(imported);
         }
     }
 
@@ -142,25 +147,25 @@ function mergeConfigs(src: TsImport, dest: TsConfig){
         if(!dest.compilerOptions){
             dest.compilerOptions = {};
         }
-        mergeCompilerOptions(src.compilerOptions, dest.compilerOptions);
+        mergeCompilerOptions(src.compilerOptions, dest.compilerOptions, src.sourcePath);
     }
     if(src.include){
         if(!dest.include){
             dest.include = [];
         }
-        mergePaths(src.include, dest.include);
+        mergePaths(src.include, dest.include, src.sourcePath);
     }
     if(src.exclude){
         if(!dest.exclude){
             dest.exclude = [];
         }
-        mergePaths(src.exclude, dest.exclude);
+        mergePaths(src.exclude, dest.exclude, src.sourcePath);
     }
     if(src.files){
         if(!dest.files){
             dest.files = [];
         }
-        mergePaths(src.files, dest.files);
+        mergePaths(src.files, dest.files, src.sourcePath);
     }
 }
 
@@ -168,11 +173,11 @@ function mergeImports(src: TsImport, dest: TsImport){
     mergeConfigs(src, dest);
     //Merge package manager if it is not already set, first one found wins
     if(src.packageManager && !dest.packageManager){
-        dest.packageManager = src.packageManager;
+        dest.packageManager = path.join(src.sourcePath, src.packageManager);
     }
 }
 
-function mergeCompilerOptions(src: CompilerOptions, dest:CompilerOptions){
+function mergeCompilerOptions(src: CompilerOptions, dest:CompilerOptions, basePath: string){
     if(src.paths){
         if(!dest.paths){
             dest.paths = {};
@@ -185,13 +190,13 @@ function mergeCompilerOptions(src: CompilerOptions, dest:CompilerOptions){
             if(!destPaths[key]){
                 destPaths[key] = [];
             }
-            mergePaths(srcPaths[key], destPaths[key]);
+            mergePaths(srcPaths[key], destPaths[key], basePath);
         }
     }
 }
 
-function mergePaths(src: string[], dest: string[]){
+function mergePaths(src: string[], dest: string[], basePath: string){
     for(let i = 0; i < src.length; ++i){
-        dest.push(src[i]);
+        dest.push(path.join(basePath, src[i]));
     }
 }
