@@ -95,13 +95,13 @@ export async function importConfigs(projectConfig: string, rootPath: string, imp
     var json: string;
     var imported: TsImport
     if(!importGlobs){
-        importGlobs = ["node_modules/*/*.tsimport"] //By default find all tsimport files in a flat structure
+        importGlobs = [path.join(rootPath, "node_modules/*/*tsimport.json")] //By default find all tsimport files in a flat structure
     }
 
     var imports: TsImport[] = [];
     for(let i = 0; i < importGlobs.length; ++i){
-        var globs = await io.globFiles(importGlobs[i])
-        for(let j = 0; j < globs.length; ++i){
+        var globs = await io.globFiles(importGlobs[i]);
+        for(let j = 0; j < globs.length; ++j){
             let currentGlob = globs[j];
             json = await io.readFile(currentGlob);
             imported = JSON.parse(json);
@@ -117,15 +117,24 @@ export async function importConfigs(projectConfig: string, rootPath: string, imp
     }
     catch(err){
         loadedConfig = {};
-    }    
+    }
 
     await streamImport(loadedConfig, imports);
 
-    json = JSON.stringify(loadedConfig);
+    json = JSON.stringify(loadedConfig, undefined, 2);
     await io.writeFile(projectConfig, json);
 }
 
 export async function streamImport(dest: TsConfig, imports: TsImport[]): Promise<void>{
+    //Reset everything we replace
+    if(!dest.compilerOptions){
+        dest.compilerOptions = {};
+    }
+    dest.compilerOptions.paths = {};
+    dest.include = [];
+    dest.exclude = [];
+    dest.files = [];
+
     for(let i = 0; i < imports.length; ++i){
         mergeImports(imports[i], <TsImport>dest);
     }

@@ -76,7 +76,7 @@ function importConfigs(projectConfig, rootPath, importGlobs) {
             switch (_a.label) {
                 case 0:
                     if (!importGlobs) {
-                        importGlobs = ["node_modules/*/*.tsimport"]; //By default find all tsimport files in a flat structure
+                        importGlobs = [path.join(rootPath, "node_modules/*/*tsimport.json")]; //By default find all tsimport files in a flat structure
                     }
                     imports = [];
                     i = 0;
@@ -99,7 +99,7 @@ function importConfigs(projectConfig, rootPath, importGlobs) {
                     imports.push(imported);
                     _a.label = 5;
                 case 5:
-                    ++i;
+                    ++j;
                     return [3 /*break*/, 3];
                 case 6:
                     ++i;
@@ -118,7 +118,7 @@ function importConfigs(projectConfig, rootPath, importGlobs) {
                 case 10: return [4 /*yield*/, streamImport(loadedConfig, imports)];
                 case 11:
                     _a.sent();
-                    json = JSON.stringify(loadedConfig);
+                    json = JSON.stringify(loadedConfig, undefined, 2);
                     return [4 /*yield*/, io.writeFile(projectConfig, json)];
                 case 12:
                     _a.sent();
@@ -132,6 +132,14 @@ function streamImport(dest, imports) {
     return __awaiter(this, void 0, void 0, function () {
         var i;
         return __generator(this, function (_a) {
+            //Reset everything we replace
+            if (!dest.compilerOptions) {
+                dest.compilerOptions = {};
+            }
+            dest.compilerOptions.paths = {};
+            dest.include = [];
+            dest.exclude = [];
+            dest.files = [];
             for (i = 0; i < imports.length; ++i) {
                 mergeImports(imports[i], dest);
             }
