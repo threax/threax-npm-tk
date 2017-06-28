@@ -63,6 +63,11 @@ function tsc(options) {
     return ep.Promise;
 }
 exports.tsc = tsc;
+var defaultGlob = "node_modules/*/*tsimport.json";
+function getDefaultGlob(rootPath) {
+    return path.join(rootPath, defaultGlob);
+}
+exports.getDefaultGlob = getDefaultGlob;
 /**
  * Load the project config and import all of the files matching the importGlobs into it.
  * This will always replace the compileroptions->paths, include, exclude and files properties
@@ -76,7 +81,7 @@ function importConfigs(projectConfig, rootPath, importGlobs) {
             switch (_a.label) {
                 case 0:
                     if (!importGlobs) {
-                        importGlobs = [path.join(rootPath, "node_modules/*/*tsimport.json")]; //By default find all tsimport files in a flat structure
+                        importGlobs = [getDefaultGlob(rootPath)]; //By default find all tsimport files in a flat structure
                     }
                     imports = [];
                     i = 0;
