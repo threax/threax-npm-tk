@@ -43,5 +43,5 @@ import * as ts from '../../typescript';
     await ts.streamImport(merged, [first, second]);
     console.log(JSON.stringify(merged, undefined, 2));
 
-    ts.importConfigs(__dirname + "/tsconfig.json", __dirname); //This will write the results to tsconfig.json in this folder.
+    ts.importConfigs(__dirname + "/tsconfig.json", [ts.getDefaultGlob(__dirname)]); //This will write the results to tsconfig.json in this folder.
 })();

@@ -88,7 +88,8 @@ export interface TsImport extends TsConfig{
 const defaultGlob = "node_modules/*/*tsimport.json";
 
 /**
- * Get the default glob 
+ * Get the default glob relative to the rootPath specified. The default glob is "node_modules\*\*tsimport.json",
+ * which is all tsimport.json files in the root node_modules folder.
  * @param rootPath The root path of the project. It must contain a node_modules folder.
  */
 export function getDefaultGlob(rootPath: string){
@@ -99,16 +100,14 @@ export function getDefaultGlob(rootPath: string){
  * Load the project config and import all of the files matching the importGlobs into it.
  * This will always replace the compileroptions->paths, include, exclude and files properties
  * in your destination config. If you need to have project specific config for one of these properties, 
- * supply a glob for it. If you don't supply a glob, the default will be "node_modules\*\*.tsimport"
+ * supply a glob for it.
  */
-export async function importConfigs(projectConfig: string, rootPath: string, importGlobs?: string[]): Promise<void>{
+export async function importConfigs(projectConfig: string, importGlobs: string[]): Promise<void>{
+    var rootPath = path.dirname(projectConfig);
     var json: string;
     var imported: TsImport
-    if(!importGlobs){
-        importGlobs = [getDefaultGlob(rootPath)] //By default find all tsimport files in a flat structure
-    }
-
     var imports: TsImport[] = [];
+
     for(let i = 0; i < importGlobs.length; ++i){
         var globs = await io.globFiles(importGlobs[i]);
         for(let j = 0; j < globs.length; ++j){
