@@ -112,10 +112,16 @@ export async function importConfigs(projectConfig: string, importGlobs: string[]
         var globs = await io.globFiles(importGlobs[i]);
         for(let j = 0; j < globs.length; ++j){
             let currentGlob = globs[j];
-            json = await io.readFile(currentGlob);
-            imported = JSON.parse(json);
-            imported.sourcePath = path.relative(rootPath, path.dirname(currentGlob));
-            imports.push(imported);
+            try{
+                json = await io.readFile(currentGlob);
+                imported = JSON.parse(json);
+                imported.sourcePath = path.relative(rootPath, path.dirname(currentGlob));
+                imports.push(imported);
+            }
+            catch(err){
+                console.error("Could not load " + currentGlob + "\nReason:" + err.message);
+                throw err;
+            }
         }
     }
 
@@ -136,13 +142,12 @@ export async function importConfigs(projectConfig: string, importGlobs: string[]
 
 export async function streamImport(dest: TsConfig, imports: TsImport[]): Promise<void>{
     //Reset everything we replace
-    if(!dest.compilerOptions){
-        dest.compilerOptions = {};
+    if(dest.compilerOptions){
+        delete dest.compilerOptions.paths;
     }
-    dest.compilerOptions.paths = {};
-    dest.include = [];
-    dest.exclude = [];
-    dest.files = [];
+    delete dest.include;
+    delete dest.exclude;
+    delete dest.files;
 
     for(let i = 0; i < imports.length; ++i){
         mergeImports(imports[i], <TsImport>dest);

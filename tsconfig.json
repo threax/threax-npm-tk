@@ -8,10 +8,12 @@
     "target": "es5",
     "moduleResolution": "node",
     "module": "commonjs",
-    "typeRoots": ["node_modules/@types"]
+    "typeRoots": [
+      "node_modules/@types"
+    ]
   },
+  "compileOnSave": true,
   "exclude": [
-      "./**/*.js"
-  ],
-  "compileOnSave": true
+    "**\\*.js"
+  ]
 }

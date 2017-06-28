@@ -81,7 +81,7 @@ exports.getDefaultGlob = getDefaultGlob;
  */
 function importConfigs(projectConfig, importGlobs) {
     return __awaiter(this, void 0, void 0, function () {
-        var rootPath, json, imported, imports, i, globs, j, currentGlob, loadedConfig, err_1;
+        var rootPath, json, imported, imports, i, globs, j, currentGlob, err_1, loadedConfig, err_2;
         return __generator(this, function (_a) {
             switch (_a.label) {
                 case 0:
@@ -90,45 +90,52 @@ function importConfigs(projectConfig, importGlobs) {
                     i = 0;
                     _a.label = 1;
                 case 1:
-                    if (!(i < importGlobs.length)) return [3 /*break*/, 7];
+                    if (!(i < importGlobs.length)) return [3 /*break*/, 9];
                     return [4 /*yield*/, io.globFiles(importGlobs[i])];
                 case 2:
                     globs = _a.sent();
                     j = 0;
                     _a.label = 3;
                 case 3:
-                    if (!(j < globs.length)) return [3 /*break*/, 6];
+                    if (!(j < globs.length)) return [3 /*break*/, 8];
                     currentGlob = globs[j];
-                    return [4 /*yield*/, io.readFile(currentGlob)];
+                    _a.label = 4;
                 case 4:
+                    _a.trys.push([4, 6, , 7]);
+                    return [4 /*yield*/, io.readFile(currentGlob)];
+                case 5:
                     json = _a.sent();
                     imported = JSON.parse(json);
                     imported.sourcePath = path.relative(rootPath, path.dirname(currentGlob));
                     imports.push(imported);
-                    _a.label = 5;
-                case 5:
+                    return [3 /*break*/, 7];
+                case 6:
+                    err_1 = _a.sent();
+                    console.error("Could not load " + currentGlob + "\nReason:" + err_1.message);
+                    throw err_1;
+                case 7:
                     ++j;
                     return [3 /*break*/, 3];
-                case 6:
+                case 8:
                     ++i;
                     return [3 /*break*/, 1];
-                case 7:
-                    _a.trys.push([7, 9, , 10]);
+                case 9:
+                    _a.trys.push([9, 11, , 12]);
                     return [4 /*yield*/, io.readFile(projectConfig)];
-                case 8:
+                case 10:
                     json = _a.sent();
                     loadedConfig = JSON.parse(json);
-                    return [3 /*break*/, 10];
-                case 9:
-                    err_1 = _a.sent();
-                    loadedConfig = {};
-                    return [3 /*break*/, 10];
-                case 10: return [4 /*yield*/, streamImport(loadedConfig, imports)];
+                    return [3 /*break*/, 12];
                 case 11:
+                    err_2 = _a.sent();
+                    loadedConfig = {};
+                    return [3 /*break*/, 12];
+                case 12: return [4 /*yield*/, streamImport(loadedConfig, imports)];
+                case 13:
                     _a.sent();
                     json = JSON.stringify(loadedConfig, undefined, 2);
                     return [4 /*yield*/, io.writeFile(projectConfig, json)];
-                case 12:
+                case 14:
                     _a.sent();
                     return [2 /*return*/];
             }
@@ -141,13 +148,12 @@ function streamImport(dest, imports) {
         var i;
         return __generator(this, function (_a) {
             //Reset everything we replace
-            if (!dest.compilerOptions) {
-                dest.compilerOptions = {};
+            if (dest.compilerOptions) {
+                delete dest.compilerOptions.paths;
             }
-            dest.compilerOptions.paths = {};
-            dest.include = [];
-            dest.exclude = [];
-            dest.files = [];
+            delete dest.include;
+            delete dest.exclude;
+            delete dest.files;
             for (i = 0; i < imports.length; ++i) {
                 mergeImports(imports[i], dest);
             }
