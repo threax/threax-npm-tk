@@ -35,7 +35,6 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
     }
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-/// <reference path="node_modules/jsns/jsns.ts" />
 var io = require("./io");
 var vm = require('vm');
 var util = require('util');

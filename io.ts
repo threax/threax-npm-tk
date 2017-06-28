@@ -11,7 +11,7 @@ interface NodeStats{
  * Get the node fsstat results for a path. This will return promise.
  */
 export function fsstat(path): Promise<NodeStats>{
-    var ep = new ExternalPromise();
+    var ep = new ExternalPromise<NodeStats>();
 
     fs.stat(path, (err, stats) =>{
         if(err){ return ep.reject(err); }
@@ -27,7 +27,7 @@ export function fsstat(path): Promise<NodeStats>{
 export function globFiles(globStr: string, ignore?: string | string[]): Promise<string[]>{
     globStr = globStr.replace(/\\/g, '/');
 
-    var ep = new ExternalPromise();
+    var ep = new ExternalPromise<string[]>();
 
     var globOptions: any = {};
     if(ignore){
