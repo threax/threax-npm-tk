@@ -53,8 +53,9 @@ export async function importConfigs(rootPath: string, outDir: string, importGlob
 }
 
 function copyFiles(imported: Artifacts, outDir: string, artifactPath: string){
+    var basePath = artifactPath;
     if(imported.pathBase !== undefined){
-        var sourcePath = path.join(artifactPath, imported.pathBase);
+        basePath = path.join(basePath, imported.pathBase);
     }
     if(imported.copy){
         var outputPath = path.join(outDir, imported.outDir);
@@ -63,7 +64,7 @@ function copyFiles(imported: Artifacts, outDir: string, artifactPath: string){
             // console.log(full);
             // console.log(outputPath);
             // console.log(sourcePath);
-            copy.glob(full, sourcePath, outputPath, imported.ignore);
+            copy.glob(full, basePath, outputPath, imported.ignore);
         }
     }
 }

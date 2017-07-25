@@ -103,8 +103,9 @@ function importConfigs(rootPath, outDir, importGlobs) {
 }
 exports.importConfigs = importConfigs;
 function copyFiles(imported, outDir, artifactPath) {
+    var basePath = artifactPath;
     if (imported.pathBase !== undefined) {
-        var sourcePath = path.join(artifactPath, imported.pathBase);
+        basePath = path.join(basePath, imported.pathBase);
     }
     if (imported.copy) {
         var outputPath = path.join(outDir, imported.outDir);
@@ -113,7 +114,7 @@ function copyFiles(imported, outDir, artifactPath) {
             // console.log(full);
             // console.log(outputPath);
             // console.log(sourcePath);
-            copy.glob(full, sourcePath, outputPath, imported.ignore);
+            copy.glob(full, basePath, outputPath, imported.ignore);
         }
     }
 }
