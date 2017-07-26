@@ -37,6 +37,7 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
 Object.defineProperty(exports, "__esModule", { value: true });
 var io = require("./io");
 var copy = require("./copy");
+var less = require("./less");
 var path = require('path');
 var defaultGlob = "node_modules/*/artifacts.json";
 /**
@@ -56,25 +57,25 @@ exports.getDefaultGlob = getDefaultGlob;
  */
 function importConfigs(rootPath, outDir, importGlobs) {
     return __awaiter(this, void 0, void 0, function () {
-        var json, imported, i, globs, j, currentGlob, j_1, err_1;
+        var json, imported, i, globs, j, currentGlob, j_1, currentGlobDir, err_1;
         return __generator(this, function (_a) {
             switch (_a.label) {
                 case 0:
                     i = 0;
                     _a.label = 1;
                 case 1:
-                    if (!(i < importGlobs.length)) return [3 /*break*/, 9];
+                    if (!(i < importGlobs.length)) return [3 /*break*/, 14];
                     return [4 /*yield*/, io.globFiles(importGlobs[i])];
                 case 2:
                     globs = _a.sent();
                     j = 0;
                     _a.label = 3;
                 case 3:
-                    if (!(j < globs.length)) return [3 /*break*/, 8];
+                    if (!(j < globs.length)) return [3 /*break*/, 13];
                     currentGlob = globs[j];
                     _a.label = 4;
                 case 4:
-                    _a.trys.push([4, 6, , 7]);
+                    _a.trys.push([4, 11, , 12]);
                     return [4 /*yield*/, io.readFile(currentGlob)];
                 case 5:
                     json = _a.sent();
@@ -82,27 +83,40 @@ function importConfigs(rootPath, outDir, importGlobs) {
                     if (!Array.isArray(imported)) {
                         imported = [imported];
                     }
-                    for (j_1 = 0; j_1 < imported.length; ++j_1) {
-                        copyFiles(imported[j_1], outDir, path.dirname(currentGlob));
-                    }
-                    return [3 /*break*/, 7];
+                    j_1 = 0;
+                    _a.label = 6;
                 case 6:
+                    if (!(j_1 < imported.length)) return [3 /*break*/, 10];
+                    currentGlobDir = path.dirname(currentGlob);
+                    return [4 /*yield*/, copyFiles(imported[j_1], outDir, currentGlobDir)];
+                case 7:
+                    _a.sent();
+                    return [4 /*yield*/, compileLess(imported[j_1], outDir, currentGlobDir)];
+                case 8:
+                    _a.sent();
+                    _a.label = 9;
+                case 9:
+                    ++j_1;
+                    return [3 /*break*/, 6];
+                case 10: return [3 /*break*/, 12];
+                case 11:
                     err_1 = _a.sent();
                     console.error("Could not load " + currentGlob + "\nReason:" + err_1.message);
                     throw err_1;
-                case 7:
+                case 12:
                     ++j;
                     return [3 /*break*/, 3];
-                case 8:
+                case 13:
                     ++i;
                     return [3 /*break*/, 1];
-                case 9: return [2 /*return*/];
+                case 14: return [2 /*return*/];
             }
         });
     });
 }
 exports.importConfigs = importConfigs;
 function copyFiles(imported, outDir, artifactPath) {
+    var promises = [];
     var basePath = artifactPath;
     if (imported.pathBase !== undefined) {
         basePath = path.join(basePath, imported.pathBase);
@@ -114,8 +128,48 @@ function copyFiles(imported, outDir, artifactPath) {
             // console.log(full);
             // console.log(outputPath);
             // console.log(sourcePath);
-            copy.glob(full, basePath, outputPath, imported.ignore);
+            promises.push(copy.glob(full, basePath, outputPath, imported.ignore));
         }
     }
+    return Promise.all(promises);
+}
+function compileLess(imported, outDir, artifactPath) {
+    var promises = [];
+    var basePath = artifactPath;
+    if (imported.pathBase !== undefined) {
+        basePath = path.join(basePath, imported.pathBase);
+    }
+    if (imported.less) {
+        var outputPath = path.join(outDir, imported.outDir);
+        for (var j = 0; j < imported.less.length; ++j) {
+            var lessOptions = imported.less[j];
+            if (lessOptions.importPaths !== undefined) {
+                for (var i = 0; i < lessOptions.importPaths.length; ++i) {
+                    lessOptions.importPaths[i] = path.join(artifactPath, lessOptions.importPaths[i]);
+                }
+            }
+            if (lessOptions.input !== undefined) {
+                lessOptions.input = path.join(artifactPath, lessOptions.input);
+            }
+            if (lessOptions.basePath !== undefined) {
+                lessOptions.basePath = path.join(basePath, lessOptions.basePath);
+            }
+            else {
+                lessOptions.basePath = basePath;
+            }
+            if (lessOptions.out !== undefined) {
+                lessOptions.out = path.join(outputPath, lessOptions.out);
+            }
+            else {
+                lessOptions.out = outputPath;
+            }
+            if (lessOptions.encoding === undefined) {
+                lessOptions.encoding = 'utf8';
+            }
+            console.log(JSON.stringify(lessOptions, undefined, 2));
+            promises.push(less.compile(lessOptions));
+        }
+    }
+    return Promise.all(promises);
 }
 //# sourceMappingURL=artifacts.js.map

@@ -5,30 +5,20 @@ var fs = require('fs-extra');
 var Glob = require("glob").Glob;
 var path = require('path');
 
-var defaultSettings = {
-    encoding: 'utf8',
-    importPaths: [],
-    input: null,
-    out: null,
-    compress: true,
-    basePath: null,
+export interface LessConfig {
+    encoding: string;
+    importPaths: string[];
+    input: string;
+    basePath: string;
+    out: string;
+    compress: boolean;
 }
 
-export function compile(settings) {
+export function compile(settings: LessConfig) {
     var ep = new ExternalPromise();
 
-    settings.prototype = defaultSettings;
-    
-    //Check for old style and throw errors
-    if(settings.inFile){
-        return ep.reject(new Error("settings.infile is deprecated, please use settings.input and specify a glob when compiling less for " + settings.paths));
-    }
-    if(settings.outFile){
-        return ep.reject(new Error("settings.outFile is deprecated, please use settings.out and settings.basePath when compiling less for " + settings.paths));
-    }
-
     if(!settings.basePath){
-        return ep.reject(new Error("Cannot find basePath setting when compiling less for " + settings.paths));
+        return ep.reject(new Error("Cannot find basePath setting when compiling less for " + settings.input));
     }
 
     var basePath = path.join(settings.basePath);

@@ -1,5 +1,6 @@
 import * as io from './io';
 import * as copy from './copy';
+import * as less from './less';
 var path = require('path');
 
 const defaultGlob = "node_modules/*/artifacts.json";
@@ -13,10 +14,11 @@ export function getDefaultGlob(rootPath: string) {
     return path.join(rootPath, defaultGlob);
 }
 
-interface Artifacts{
+interface Artifacts {
     pathBase?: string;
     outDir?: string;
     copy?: string[];
+    less?: less.LessConfig[];
     ignore?: string | string[];
 }
 
@@ -41,7 +43,9 @@ export async function importConfigs(rootPath: string, outDir: string, importGlob
                     imported = [imported];
                 }
                 for(let j = 0; j < imported.length; ++j){
-                    copyFiles(imported[j], outDir, path.dirname(currentGlob));
+                    var currentGlobDir = path.dirname(currentGlob);
+                    await copyFiles(imported[j], outDir, currentGlobDir);
+                    await compileLess(imported[j], outDir, currentGlobDir);
                 }
             }
             catch (err) {
@@ -52,7 +56,9 @@ export async function importConfigs(rootPath: string, outDir: string, importGlob
     }
 }
 
-function copyFiles(imported: Artifacts, outDir: string, artifactPath: string){
+function copyFiles(imported: Artifacts, outDir: string, artifactPath: string): Promise<any[]> {
+    var promises = [];
+
     var basePath = artifactPath;
     if(imported.pathBase !== undefined){
         basePath = path.join(basePath, imported.pathBase);
@@ -64,7 +70,53 @@ function copyFiles(imported: Artifacts, outDir: string, artifactPath: string){
             // console.log(full);
             // console.log(outputPath);
             // console.log(sourcePath);
-            copy.glob(full, basePath, outputPath, imported.ignore);
+            promises.push(copy.glob(full, basePath, outputPath, imported.ignore));
         }
     }
+
+    return Promise.all(promises);
+}
+
+function compileLess(imported: Artifacts, outDir: string, artifactPath: string): Promise<any>{
+    var promises = [];
+
+    var basePath = artifactPath;
+    if(imported.pathBase !== undefined){
+        basePath = path.join(basePath, imported.pathBase);
+    }
+    if(imported.less){
+        var outputPath = path.join(outDir, imported.outDir);
+        for(let j = 0; j < imported.less.length; ++j) {
+            var lessOptions = imported.less[j];
+            if(lessOptions.importPaths !== undefined){
+                for(var i = 0; i < lessOptions.importPaths.length; ++i){
+                    lessOptions.importPaths[i] = path.join(artifactPath, lessOptions.importPaths[i]);
+                }
+            }
+            if(lessOptions.input !== undefined){
+                lessOptions.input = path.join(artifactPath, lessOptions.input);
+            }
+            if(lessOptions.basePath !== undefined){
+                lessOptions.basePath = path.join(basePath, lessOptions.basePath);
+            }
+            else{
+                lessOptions.basePath = basePath;
+            }
+            if(lessOptions.out !== undefined){
+                lessOptions.out = path.join(outputPath, lessOptions.out);
+            }
+            else{
+                lessOptions.out = outputPath;
+            }
+            if(lessOptions.encoding === undefined){
+                lessOptions.encoding = 'utf8';
+            }
+
+            console.log(JSON.stringify(lessOptions, undefined, 2));
+
+            promises.push(less.compile(lessOptions));
+        }
+    }
+
+    return Promise.all(promises);
 }
