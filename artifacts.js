@@ -140,6 +140,9 @@ function compileLess(imported, outDir, artifactPath) {
         basePath = path.join(basePath, imported.pathBase);
     }
     if (imported.less) {
+        if (!Array.isArray(imported.less)) {
+            imported.less = [imported.less];
+        }
         var outputPath = path.join(outDir, imported.outDir);
         for (var j = 0; j < imported.less.length; ++j) {
             var lessOptions = imported.less[j];
