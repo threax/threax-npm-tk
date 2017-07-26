@@ -166,7 +166,6 @@ function compileLess(imported, outDir, artifactPath) {
             if (lessOptions.encoding === undefined) {
                 lessOptions.encoding = 'utf8';
             }
-            console.log(JSON.stringify(lessOptions, undefined, 2));
             promises.push(less.compile(lessOptions));
         }
     }
