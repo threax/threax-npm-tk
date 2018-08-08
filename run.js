@@ -49,6 +49,7 @@ var io = require("./io");
                     mainArtifacts = filesDir + '/artifacts.json';
                     if (process.argv.length < 3) {
                         console.log("You must include a command. Type threax-npm-tk help for help.");
+                        process.exit(1);
                     }
                     _b.label = 1;
                 case 1:
@@ -70,10 +71,12 @@ var io = require("./io");
                     return [4 /*yield*/, artifact.importConfigs(filesDir, outDir, [mainArtifacts, artifact.getDefaultGlob(filesDir)])];
                 case 4:
                     _b.sent();
+                    console.log("Build sucessful");
                     return [3 /*break*/, 9];
                 case 5: return [4 /*yield*/, io.emptyDir(outDir)];
                 case 6:
                     _b.sent();
+                    console.log("Cleaned " + outDir);
                     return [3 /*break*/, 9];
                 case 7:
                     console.log("build - Build the project based on artifact.json files.");

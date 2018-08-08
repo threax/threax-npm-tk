@@ -9,6 +9,7 @@ import * as io from './io';
 
     if(process.argv.length < 3){
         console.log("You must include a command. Type threax-npm-tk help for help.");
+        process.exit(1);
     }
     try{
         switch(process.argv[2]){
@@ -20,9 +21,12 @@ import * as io from './io';
                     });
 
                     await artifact.importConfigs(filesDir, outDir, [mainArtifacts, artifact.getDefaultGlob(filesDir)]);
+
+                    console.log("Build sucessful");
                 break;
             case 'clean':
                 await io.emptyDir(outDir);
+                console.log("Cleaned " + outDir);
                 break;
             case 'help':
                 console.log("build - Build the project based on artifact.json files.");
