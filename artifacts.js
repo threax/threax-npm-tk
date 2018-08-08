@@ -41,8 +41,8 @@ var less = require("./less");
 var path = require('path');
 var defaultGlob = "node_modules/*/artifacts.json";
 /**
- * Get the default glob relative to the rootPath specified. The default glob is "node_modules\*\*tsimport.json",
- * which is all tsimport.json files in the root node_modules folder.
+ * Get the default glob relative to the rootPath specified. The default glob is "node_modules\*\*artifacts.json",
+ * which is all artifacts.json files in the root node_modules folder.
  * @param rootPath The root path of the project. It must contain a node_modules folder.
  */
 function getDefaultGlob(rootPath) {
