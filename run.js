@@ -37,34 +37,61 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
 Object.defineProperty(exports, "__esModule", { value: true });
 var typescript_1 = require("./typescript");
 var artifact = require("./artifacts");
-var filesDir = process.cwd();
-var outDir = filesDir + "/wwwroot";
-var mainArtifacts = filesDir + '/artifacts.json';
-console.log("Building " + filesDir + " to " + outDir);
+var io = require("./io");
 (function () {
     return __awaiter(this, void 0, void 0, function () {
-        var err_1;
-        return __generator(this, function (_a) {
-            switch (_a.label) {
+        var filesDir, outDir, mainArtifacts, _a, err_1;
+        return __generator(this, function (_b) {
+            switch (_b.label) {
                 case 0:
-                    _a.trys.push([0, 3, , 4]);
+                    filesDir = process.cwd();
+                    outDir = filesDir + "/wwwroot";
+                    mainArtifacts = filesDir + '/artifacts.json';
+                    if (process.argv.length < 3) {
+                        console.log("You must include a command. Type threax-npm-tk help for help.");
+                    }
+                    _b.label = 1;
+                case 1:
+                    _b.trys.push([1, 10, , 11]);
+                    _a = process.argv[2];
+                    switch (_a) {
+                        case 'build': return [3 /*break*/, 2];
+                        case 'clean': return [3 /*break*/, 5];
+                        case 'help': return [3 /*break*/, 7];
+                    }
+                    return [3 /*break*/, 8];
+                case 2:
+                    console.log("Building " + filesDir + " to " + outDir);
                     return [4 /*yield*/, typescript_1.tsc({
                             projectFolder: filesDir
                         })];
-                case 1:
-                    _a.sent();
-                    return [4 /*yield*/, artifact.importConfigs(filesDir, outDir, [mainArtifacts, artifact.getDefaultGlob(filesDir)])];
-                case 2:
-                    _a.sent();
-                    return [3 /*break*/, 4];
                 case 3:
-                    err_1 = _a.sent();
+                    _b.sent();
+                    return [4 /*yield*/, artifact.importConfigs(filesDir, outDir, [mainArtifacts, artifact.getDefaultGlob(filesDir)])];
+                case 4:
+                    _b.sent();
+                    return [3 /*break*/, 9];
+                case 5: return [4 /*yield*/, io.emptyDir(outDir)];
+                case 6:
+                    _b.sent();
+                    return [3 /*break*/, 9];
+                case 7:
+                    console.log("build - Build the project based on artifact.json files.");
+                    console.log("clean - Clean the output directory.");
+                    console.log("help - Display help.");
+                    return [3 /*break*/, 9];
+                case 8:
+                    console.log("Unknown command " + process.argv[2]);
+                    return [3 /*break*/, 9];
+                case 9: return [3 /*break*/, 11];
+                case 10:
+                    err_1 = _b.sent();
                     console.log(JSON.stringify(err_1));
                     process.exit(1);
-                    return [3 /*break*/, 4];
-                case 4: return [2 /*return*/];
+                    return [3 /*break*/, 11];
+                case 11: return [2 /*return*/];
             }
         });
     });
 })();
-//# sourceMappingURL=build.js.map
+//# sourceMappingURL=run.js.map

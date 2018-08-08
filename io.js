@@ -153,4 +153,15 @@ function writeFile(path, data) {
     return ep.Promise;
 }
 exports.writeFile = writeFile;
+function emptyDir(path) {
+    var ep = new externalPromise_1.ExternalPromise();
+    fs.emptyDir(path, function (err, data) {
+        if (err) {
+            return ep.reject(err);
+        }
+        ep.resolve(data);
+    });
+    return ep.Promise;
+}
+exports.emptyDir = emptyDir;
 //# sourceMappingURL=io.js.map

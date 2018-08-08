@@ -100,3 +100,12 @@ export function writeFile(path: string, data: any){
         });
     return ep.Promise;
 }
+
+export function emptyDir(path: string): Promise<any>{
+    var ep = new ExternalPromise();
+    fs.emptyDir(path, (err, data) => {
+        if (err){ return ep.reject(err); }
+        ep.resolve(data);
+    });
+    return ep.Promise;
+}
