@@ -1,4 +1,3 @@
-import { tsc } from './typescript';
 import * as artifact from './artifacts';
 import * as io from './io';
 
@@ -15,13 +14,7 @@ import * as io from './io';
         switch(process.argv[2]){
             case 'build':
                     console.log("Building " + filesDir + " to " + outDir);
-
-                    await tsc({
-                        projectFolder: filesDir
-                    });
-
                     await artifact.importConfigs(filesDir, outDir, [mainArtifacts, artifact.getDefaultGlob(filesDir)]);
-
                     console.log("Build sucessful");
                 break;
             case 'clean':

@@ -35,7 +35,6 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
     }
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-var typescript_1 = require("./typescript");
 var artifact = require("./artifacts");
 var io = require("./io");
 (function () {
@@ -53,46 +52,41 @@ var io = require("./io");
                     }
                     _b.label = 1;
                 case 1:
-                    _b.trys.push([1, 10, , 11]);
+                    _b.trys.push([1, 9, , 10]);
                     _a = process.argv[2];
                     switch (_a) {
                         case 'build': return [3 /*break*/, 2];
-                        case 'clean': return [3 /*break*/, 5];
-                        case 'help': return [3 /*break*/, 7];
+                        case 'clean': return [3 /*break*/, 4];
+                        case 'help': return [3 /*break*/, 6];
                     }
-                    return [3 /*break*/, 8];
+                    return [3 /*break*/, 7];
                 case 2:
                     console.log("Building " + filesDir + " to " + outDir);
-                    return [4 /*yield*/, typescript_1.tsc({
-                            projectFolder: filesDir
-                        })];
+                    return [4 /*yield*/, artifact.importConfigs(filesDir, outDir, [mainArtifacts, artifact.getDefaultGlob(filesDir)])];
                 case 3:
                     _b.sent();
-                    return [4 /*yield*/, artifact.importConfigs(filesDir, outDir, [mainArtifacts, artifact.getDefaultGlob(filesDir)])];
-                case 4:
-                    _b.sent();
                     console.log("Build sucessful");
-                    return [3 /*break*/, 9];
-                case 5: return [4 /*yield*/, io.emptyDir(outDir)];
-                case 6:
+                    return [3 /*break*/, 8];
+                case 4: return [4 /*yield*/, io.emptyDir(outDir)];
+                case 5:
                     _b.sent();
                     console.log("Cleaned " + outDir);
-                    return [3 /*break*/, 9];
-                case 7:
+                    return [3 /*break*/, 8];
+                case 6:
                     console.log("build - Build the project based on artifact.json files.");
                     console.log("clean - Clean the output directory.");
                     console.log("help - Display help.");
-                    return [3 /*break*/, 9];
-                case 8:
+                    return [3 /*break*/, 8];
+                case 7:
                     console.log("Unknown command " + process.argv[2]);
-                    return [3 /*break*/, 9];
-                case 9: return [3 /*break*/, 11];
-                case 10:
+                    return [3 /*break*/, 8];
+                case 8: return [3 /*break*/, 10];
+                case 9:
                     err_1 = _b.sent();
                     console.log(JSON.stringify(err_1));
                     process.exit(1);
-                    return [3 /*break*/, 11];
-                case 11: return [2 /*return*/];
+                    return [3 /*break*/, 10];
+                case 10: return [2 /*return*/];
             }
         });
     });

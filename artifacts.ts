@@ -1,6 +1,8 @@
 import * as io from './io';
 import * as copy from './copy';
 import * as less from './less';
+import * as typescript from './typescript';
+import * as jsnsTools from './jsnstools';
 var path = require('path');
 
 const defaultGlob = "node_modules/*/artifacts.json";
@@ -20,6 +22,7 @@ interface Artifacts {
     copy?: string[];
     less?: less.LessConfig[];
     ignore?: string | string[];
+    typescript?: typescript.TsArtifactOptions;
 }
 
 /**
@@ -46,6 +49,7 @@ export async function importConfigs(rootPath: string, outDir: string, importGlob
                     var currentGlobDir = path.dirname(currentGlob);
                     await copyFiles(imported[j], outDir, currentGlobDir);
                     await compileLess(imported[j], outDir, currentGlobDir);
+                    await compileTypescript(imported[j], outDir, currentGlobDir);
                 }
             }
             catch (err) {
@@ -120,4 +124,46 @@ function compileLess(imported: Artifacts, outDir: string, artifactPath: string):
     }
 
     return Promise.all(promises);
+}
+
+async function compileTypescript(imported: Artifacts, outDir: string, artifactPath: string) {
+    if(imported.typescript) {
+        console.log("Compiling typescript with " + artifactPath + '/tsconfig.json');
+        if(imported.typescript.compile) {
+            await typescript.tsc({
+                projectFolder: artifactPath
+            });
+        }
+        
+        if(imported.typescript.shakeModules) {
+            //Try to load the tsconfig from the artifact path. This will determine the input file
+            var tscOutputFile;
+            var json = await io.readFile(artifactPath + '/tsconfig.json');
+            var tsConfig = JSON.parse(json);
+            if(tsConfig.compilerOptions && tsConfig.compilerOptions.outFile){
+                tscOutputFile = tsConfig.compilerOptions.outFile;
+            }
+
+            var shakenOutputFile;
+            //If the artifacts file defines a shake output file, use that path following the defined paths in the artifacts.json file
+            if(imported.typescript.shakeModules.outFile){
+                shakenOutputFile = path.join(imported.outDir, imported.typescript.shakeModules.outFile);
+                shakenOutputFile = path.join(outDir, shakenOutputFile);
+            }
+            else{
+                //Discover location of typescript output, use that path unless an outfile is specified in the shake options
+                //Typescript outputs using the tsconfig settings, so we use artifactPath here.
+                var tscOutPath = path.dirname(tscOutputFile);
+                var shakenFile = path.basename(tscOutputFile, '.js') + ".shake.js";
+                shakenOutputFile = path.join(artifactPath, tscOutPath, shakenFile);
+            }
+
+            //Scope to output path
+            tscOutputFile = path.join(artifactPath, tscOutputFile);
+
+            console.log('Shaking jsns modules from ' + tscOutputFile + ' to ' + shakenOutputFile);
+
+            await jsnsTools.saveLoadedModules(tscOutputFile, imported.typescript.shakeModules.runners, shakenOutputFile);
+        }
+    }
 }

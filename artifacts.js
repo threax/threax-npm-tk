@@ -38,6 +38,8 @@ Object.defineProperty(exports, "__esModule", { value: true });
 var io = require("./io");
 var copy = require("./copy");
 var less = require("./less");
+var typescript = require("./typescript");
+var jsnsTools = require("./jsnstools");
 var path = require('path');
 var defaultGlob = "node_modules/*/artifacts.json";
 /**
@@ -64,18 +66,18 @@ function importConfigs(rootPath, outDir, importGlobs) {
                     i = 0;
                     _a.label = 1;
                 case 1:
-                    if (!(i < importGlobs.length)) return [3 /*break*/, 14];
+                    if (!(i < importGlobs.length)) return [3 /*break*/, 15];
                     return [4 /*yield*/, io.globFiles(importGlobs[i])];
                 case 2:
                     globs = _a.sent();
                     j = 0;
                     _a.label = 3;
                 case 3:
-                    if (!(j < globs.length)) return [3 /*break*/, 13];
+                    if (!(j < globs.length)) return [3 /*break*/, 14];
                     currentGlob = globs[j];
                     _a.label = 4;
                 case 4:
-                    _a.trys.push([4, 11, , 12]);
+                    _a.trys.push([4, 12, , 13]);
                     return [4 /*yield*/, io.readFile(currentGlob)];
                 case 5:
                     json = _a.sent();
@@ -86,7 +88,7 @@ function importConfigs(rootPath, outDir, importGlobs) {
                     j_1 = 0;
                     _a.label = 6;
                 case 6:
-                    if (!(j_1 < imported.length)) return [3 /*break*/, 10];
+                    if (!(j_1 < imported.length)) return [3 /*break*/, 11];
                     currentGlobDir = path.dirname(currentGlob);
                     return [4 /*yield*/, copyFiles(imported[j_1], outDir, currentGlobDir)];
                 case 7:
@@ -94,22 +96,25 @@ function importConfigs(rootPath, outDir, importGlobs) {
                     return [4 /*yield*/, compileLess(imported[j_1], outDir, currentGlobDir)];
                 case 8:
                     _a.sent();
-                    _a.label = 9;
+                    return [4 /*yield*/, compileTypescript(imported[j_1], outDir, currentGlobDir)];
                 case 9:
+                    _a.sent();
+                    _a.label = 10;
+                case 10:
                     ++j_1;
                     return [3 /*break*/, 6];
-                case 10: return [3 /*break*/, 12];
-                case 11:
+                case 11: return [3 /*break*/, 13];
+                case 12:
                     err_1 = _a.sent();
                     console.error("Could not load " + currentGlob + "\nReason:" + err_1.message);
                     throw err_1;
-                case 12:
+                case 13:
                     ++j;
                     return [3 /*break*/, 3];
-                case 13:
+                case 14:
                     ++i;
                     return [3 /*break*/, 1];
-                case 14: return [2 /*return*/];
+                case 15: return [2 /*return*/];
             }
         });
     });
@@ -173,5 +178,51 @@ function compileLess(imported, outDir, artifactPath) {
         }
     }
     return Promise.all(promises);
+}
+function compileTypescript(imported, outDir, artifactPath) {
+    return __awaiter(this, void 0, void 0, function () {
+        var tscOutputFile, json, tsConfig, shakenOutputFile, tscOutPath, shakenFile;
+        return __generator(this, function (_a) {
+            switch (_a.label) {
+                case 0:
+                    if (!imported.typescript) return [3 /*break*/, 5];
+                    console.log("Compiling typescript with " + artifactPath + '/tsconfig.json');
+                    if (!imported.typescript.compile) return [3 /*break*/, 2];
+                    return [4 /*yield*/, typescript.tsc({
+                            projectFolder: artifactPath
+                        })];
+                case 1:
+                    _a.sent();
+                    _a.label = 2;
+                case 2:
+                    if (!imported.typescript.shakeModules) return [3 /*break*/, 5];
+                    return [4 /*yield*/, io.readFile(artifactPath + '/tsconfig.json')];
+                case 3:
+                    json = _a.sent();
+                    tsConfig = JSON.parse(json);
+                    if (tsConfig.compilerOptions && tsConfig.compilerOptions.outFile) {
+                        tscOutputFile = tsConfig.compilerOptions.outFile;
+                    }
+                    //If the artifacts file defines a shake output file, use that path following the defined paths in the artifacts.json file
+                    if (imported.typescript.shakeModules.outFile) {
+                        shakenOutputFile = path.join(imported.outDir, imported.typescript.shakeModules.outFile);
+                        shakenOutputFile = path.join(outDir, shakenOutputFile);
+                    }
+                    else {
+                        tscOutPath = path.dirname(tscOutputFile);
+                        shakenFile = path.basename(tscOutputFile, '.js') + ".shake.js";
+                        shakenOutputFile = path.join(artifactPath, tscOutPath, shakenFile);
+                    }
+                    //Scope to output path
+                    tscOutputFile = path.join(artifactPath, tscOutputFile);
+                    console.log('Shaking jsns modules from ' + tscOutputFile + ' to ' + shakenOutputFile);
+                    return [4 /*yield*/, jsnsTools.saveLoadedModules(tscOutputFile, imported.typescript.shakeModules.runners, shakenOutputFile)];
+                case 4:
+                    _a.sent();
+                    _a.label = 5;
+                case 5: return [2 /*return*/];
+            }
+        });
+    });
 }
 //# sourceMappingURL=artifacts.js.map

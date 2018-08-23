@@ -4,7 +4,17 @@ import * as io from './io';
 var exec = require('child_process').exec;
 var path = require('path');
 
-export interface TypescriptOptions{
+export interface ShakeModulesOptions {
+    runners: string[];
+    outFile: string;
+}
+
+export interface TsArtifactOptions {
+    compile: boolean;
+    shakeModules: ShakeModulesOptions;
+}
+
+export interface TypescriptOptions {
     /**
      * The folder to use for the tsc working directory. Set this to the directory your tsconfig resides in. 
      */
