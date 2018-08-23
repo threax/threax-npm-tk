@@ -11,6 +11,7 @@ var path = require('path');
     var filesDir = process.cwd();
     var outPath = "wwwroot";
     var artifactsGlob = [];
+    var verbose = false;
 
     //Process command line args
     for(var i = 3; i < process.argv.length; i+=2){
@@ -23,6 +24,9 @@ var path = require('path');
                 break;
             case '-a':
                 artifactsGlob.push(process.argv[i + 1]);
+                break;
+            case '-v':
+                verbose = process.argv[i + 1] === 'true';
                 break;
         }
     }
@@ -39,7 +43,7 @@ var path = require('path');
         switch(process.argv[2]){
             case 'build':
                     console.log("Building " + filesDir + " to " + outDir);
-                    await artifact.importConfigs(filesDir, outDir, artifactsGlob);
+                    await artifact.importConfigs(filesDir, outDir, artifactsGlob, verbose);
                     console.log("Build sucessful");
                 break;
             case 'clean':

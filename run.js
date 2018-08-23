@@ -40,7 +40,7 @@ var io = require("./io");
 var path = require('path');
 (function () {
     return __awaiter(this, void 0, void 0, function () {
-        var filesDir, outPath, artifactsGlob, i, outDir, _a, err_1;
+        var filesDir, outPath, artifactsGlob, verbose, i, outDir, _a, err_1;
         return __generator(this, function (_b) {
             switch (_b.label) {
                 case 0:
@@ -51,6 +51,7 @@ var path = require('path');
                     filesDir = process.cwd();
                     outPath = "wwwroot";
                     artifactsGlob = [];
+                    verbose = false;
                     //Process command line args
                     for (i = 3; i < process.argv.length; i += 2) {
                         switch (process.argv[i]) {
@@ -62,6 +63,9 @@ var path = require('path');
                                 break;
                             case '-a':
                                 artifactsGlob.push(process.argv[i + 1]);
+                                break;
+                            case '-v':
+                                verbose = process.argv[i + 1] === 'true';
                                 break;
                         }
                     }
@@ -83,7 +87,7 @@ var path = require('path');
                     return [3 /*break*/, 7];
                 case 2:
                     console.log("Building " + filesDir + " to " + outDir);
-                    return [4 /*yield*/, artifact.importConfigs(filesDir, outDir, artifactsGlob)];
+                    return [4 /*yield*/, artifact.importConfigs(filesDir, outDir, artifactsGlob, verbose)];
                 case 3:
                     _b.sent();
                     console.log("Build sucessful");

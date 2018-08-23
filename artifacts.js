@@ -52,12 +52,9 @@ function getDefaultGlob(rootPath) {
 }
 exports.getDefaultGlob = getDefaultGlob;
 /**
- * Load the project config and import all of the files matching the importGlobs into it.
- * This will always replace the compileroptions->paths, include, exclude and files properties
- * in your destination config. If you need to have project specific config for one of these properties,
- * supply a glob for it.
+ * Load the and process the specified artifacts.json files.
  */
-function importConfigs(rootPath, outDir, importGlobs) {
+function importConfigs(rootPath, outDir, importGlobs, verbose) {
     return __awaiter(this, void 0, void 0, function () {
         var json, imported, i, globs, j, currentGlob, j_1, currentGlobDir, err_1;
         return __generator(this, function (_a) {
@@ -78,6 +75,9 @@ function importConfigs(rootPath, outDir, importGlobs) {
                     _a.label = 4;
                 case 4:
                     _a.trys.push([4, 12, , 13]);
+                    if (verbose) {
+                        console.log("Reading " + currentGlob);
+                    }
                     return [4 /*yield*/, io.readFile(currentGlob)];
                 case 5:
                     json = _a.sent();
@@ -90,13 +90,13 @@ function importConfigs(rootPath, outDir, importGlobs) {
                 case 6:
                     if (!(j_1 < imported.length)) return [3 /*break*/, 11];
                     currentGlobDir = path.dirname(currentGlob);
-                    return [4 /*yield*/, copyFiles(imported[j_1], outDir, currentGlobDir)];
+                    return [4 /*yield*/, copyFiles(imported[j_1], outDir, currentGlobDir, verbose)];
                 case 7:
                     _a.sent();
-                    return [4 /*yield*/, compileLess(imported[j_1], outDir, currentGlobDir)];
+                    return [4 /*yield*/, compileLess(imported[j_1], outDir, currentGlobDir, verbose)];
                 case 8:
                     _a.sent();
-                    return [4 /*yield*/, compileTypescript(imported[j_1], outDir, currentGlobDir)];
+                    return [4 /*yield*/, compileTypescript(imported[j_1], outDir, currentGlobDir, verbose)];
                 case 9:
                     _a.sent();
                     _a.label = 10;
@@ -120,7 +120,7 @@ function importConfigs(rootPath, outDir, importGlobs) {
     });
 }
 exports.importConfigs = importConfigs;
-function copyFiles(imported, outDir, artifactPath) {
+function copyFiles(imported, outDir, artifactPath, verbose) {
     var promises = [];
     var basePath = artifactPath;
     if (imported.pathBase !== undefined) {
@@ -130,15 +130,15 @@ function copyFiles(imported, outDir, artifactPath) {
         var outputPath = path.join(outDir, imported.outDir);
         for (var j = 0; j < imported.copy.length; ++j) {
             var full = path.join(artifactPath, imported.copy[j]);
-            // console.log(full);
-            // console.log(outputPath);
-            // console.log(sourcePath);
+            if (verbose) {
+                console.log("  Copying files " + full + " to " + outputPath);
+            }
             promises.push(copy.glob(full, basePath, outputPath, imported.ignore));
         }
     }
     return Promise.all(promises);
 }
-function compileLess(imported, outDir, artifactPath) {
+function compileLess(imported, outDir, artifactPath, verbose) {
     var promises = [];
     var basePath = artifactPath;
     if (imported.pathBase !== undefined) {
@@ -174,19 +174,24 @@ function compileLess(imported, outDir, artifactPath) {
             if (lessOptions.encoding === undefined) {
                 lessOptions.encoding = 'utf8';
             }
+            if (verbose) {
+                console.log("  Compiling less " + lessOptions.input + " to " + lessOptions.out);
+            }
             promises.push(less.compile(lessOptions));
         }
     }
     return Promise.all(promises);
 }
-function compileTypescript(imported, outDir, artifactPath) {
+function compileTypescript(imported, outDir, artifactPath, verbose) {
     return __awaiter(this, void 0, void 0, function () {
         var tscOutputFile, json, tsConfig, shakenOutputFile, tscOutPath, shakenFile;
         return __generator(this, function (_a) {
             switch (_a.label) {
                 case 0:
                     if (!imported.typescript) return [3 /*break*/, 5];
-                    console.log("Compiling typescript with " + artifactPath + '/tsconfig.json');
+                    if (verbose) {
+                        console.log("  Compiling typescript with " + artifactPath + '/tsconfig.json');
+                    }
                     if (!imported.typescript.compile) return [3 /*break*/, 2];
                     return [4 /*yield*/, typescript.tsc({
                             projectFolder: artifactPath
@@ -215,7 +220,9 @@ function compileTypescript(imported, outDir, artifactPath) {
                     }
                     //Scope to output path
                     tscOutputFile = path.join(artifactPath, tscOutputFile);
-                    console.log('Shaking jsns modules from ' + tscOutputFile + ' to ' + shakenOutputFile);
+                    if (verbose) {
+                        console.log('  Shaking jsns modules from ' + tscOutputFile + ' to ' + shakenOutputFile);
+                    }
                     return [4 /*yield*/, jsnsTools.saveLoadedModules(tscOutputFile, imported.typescript.shakeModules.runners, shakenOutputFile)];
                 case 4:
                     _a.sent();

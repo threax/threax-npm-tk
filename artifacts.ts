@@ -26,12 +26,9 @@ interface Artifacts {
 }
 
 /**
- * Load the project config and import all of the files matching the importGlobs into it.
- * This will always replace the compileroptions->paths, include, exclude and files properties
- * in your destination config. If you need to have project specific config for one of these properties, 
- * supply a glob for it.
+ * Load the and process the specified artifacts.json files.
  */
-export async function importConfigs(rootPath: string, outDir: string, importGlobs: string[]): Promise<void> {
+export async function importConfigs(rootPath: string, outDir: string, importGlobs: string[], verbose?: boolean): Promise<void> {
     var json: string;
     var imported: Artifacts[];
 
@@ -40,6 +37,9 @@ export async function importConfigs(rootPath: string, outDir: string, importGlob
         for (let j = 0; j < globs.length; ++j) {
             let currentGlob = globs[j];
             try {
+                if(verbose){
+                    console.log("Reading " + currentGlob);
+                }
                 json = await io.readFile(currentGlob);
                 imported = JSON.parse(json);
                 if(!Array.isArray(imported)){
@@ -47,9 +47,9 @@ export async function importConfigs(rootPath: string, outDir: string, importGlob
                 }
                 for(let j = 0; j < imported.length; ++j){
                     var currentGlobDir = path.dirname(currentGlob);
-                    await copyFiles(imported[j], outDir, currentGlobDir);
-                    await compileLess(imported[j], outDir, currentGlobDir);
-                    await compileTypescript(imported[j], outDir, currentGlobDir);
+                    await copyFiles(imported[j], outDir, currentGlobDir, verbose);
+                    await compileLess(imported[j], outDir, currentGlobDir, verbose);
+                    await compileTypescript(imported[j], outDir, currentGlobDir, verbose);
                 }
             }
             catch (err) {
@@ -60,7 +60,7 @@ export async function importConfigs(rootPath: string, outDir: string, importGlob
     }
 }
 
-function copyFiles(imported: Artifacts, outDir: string, artifactPath: string): Promise<any[]> {
+function copyFiles(imported: Artifacts, outDir: string, artifactPath: string, verbose: boolean): Promise<any[]> {
     var promises = [];
 
     var basePath = artifactPath;
@@ -71,9 +71,9 @@ function copyFiles(imported: Artifacts, outDir: string, artifactPath: string): P
         var outputPath = path.join(outDir, imported.outDir);
         for(let j = 0; j < imported.copy.length; ++j) {
             var full = path.join(artifactPath, imported.copy[j]);
-            // console.log(full);
-            // console.log(outputPath);
-            // console.log(sourcePath);
+            if(verbose){
+                console.log("  Copying files " + full + " to " + outputPath);
+            }
             promises.push(copy.glob(full, basePath, outputPath, imported.ignore));
         }
     }
@@ -81,7 +81,7 @@ function copyFiles(imported: Artifacts, outDir: string, artifactPath: string): P
     return Promise.all(promises);
 }
 
-function compileLess(imported: Artifacts, outDir: string, artifactPath: string): Promise<any>{
+function compileLess(imported: Artifacts, outDir: string, artifactPath: string, verbose: boolean): Promise<any>{
     var promises = [];
 
     var basePath = artifactPath;
@@ -119,6 +119,10 @@ function compileLess(imported: Artifacts, outDir: string, artifactPath: string):
                 lessOptions.encoding = 'utf8';
             }
 
+            if(verbose){
+                console.log("  Compiling less " + lessOptions.input + " to " + lessOptions.out);
+            }
+
             promises.push(less.compile(lessOptions));
         }
     }
@@ -126,9 +130,11 @@ function compileLess(imported: Artifacts, outDir: string, artifactPath: string):
     return Promise.all(promises);
 }
 
-async function compileTypescript(imported: Artifacts, outDir: string, artifactPath: string) {
+async function compileTypescript(imported: Artifacts, outDir: string, artifactPath: string, verbose: boolean) {
     if(imported.typescript) {
-        console.log("Compiling typescript with " + artifactPath + '/tsconfig.json');
+        if(verbose){
+            console.log("  Compiling typescript with " + artifactPath + '/tsconfig.json');
+        }
         if(imported.typescript.compile) {
             await typescript.tsc({
                 projectFolder: artifactPath
@@ -161,7 +167,9 @@ async function compileTypescript(imported: Artifacts, outDir: string, artifactPa
             //Scope to output path
             tscOutputFile = path.join(artifactPath, tscOutputFile);
 
-            console.log('Shaking jsns modules from ' + tscOutputFile + ' to ' + shakenOutputFile);
+            if(verbose){
+                console.log('  Shaking jsns modules from ' + tscOutputFile + ' to ' + shakenOutputFile);
+            }
 
             await jsnsTools.saveLoadedModules(tscOutputFile, imported.typescript.shakeModules.runners, shakenOutputFile);
         }
