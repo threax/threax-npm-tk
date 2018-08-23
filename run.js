@@ -37,19 +37,40 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
 Object.defineProperty(exports, "__esModule", { value: true });
 var artifact = require("./artifacts");
 var io = require("./io");
+var path = require('path');
 (function () {
     return __awaiter(this, void 0, void 0, function () {
-        var filesDir, outDir, mainArtifacts, _a, err_1;
+        var filesDir, outPath, artifactsGlob, i, outDir, _a, err_1;
         return __generator(this, function (_b) {
             switch (_b.label) {
                 case 0:
-                    filesDir = process.cwd();
-                    outDir = filesDir + "/wwwroot";
-                    mainArtifacts = filesDir + '/artifacts.json';
                     if (process.argv.length < 3) {
                         console.log("You must include a command. Type threax-npm-tk help for help.");
                         process.exit(1);
                     }
+                    filesDir = process.cwd();
+                    outPath = "wwwroot";
+                    artifactsGlob = [];
+                    //Process command line args
+                    for (i = 3; i < process.argv.length; i += 2) {
+                        switch (process.argv[i]) {
+                            case '-s':
+                                filesDir = process.argv[i + 1];
+                                break;
+                            case '-o':
+                                outPath = process.argv[i + 1];
+                                break;
+                            case '-a':
+                                artifactsGlob.push(process.argv[i + 1]);
+                                break;
+                        }
+                    }
+                    //Setup default globs, if none were provided
+                    if (artifactsGlob.length === 0) {
+                        artifactsGlob.push(path.join(filesDir, '/artifacts.json'));
+                        artifactsGlob.push(artifact.getDefaultGlob(filesDir));
+                    }
+                    outDir = path.join(filesDir, outPath);
                     _b.label = 1;
                 case 1:
                     _b.trys.push([1, 9, , 10]);
@@ -62,7 +83,7 @@ var io = require("./io");
                     return [3 /*break*/, 7];
                 case 2:
                     console.log("Building " + filesDir + " to " + outDir);
-                    return [4 /*yield*/, artifact.importConfigs(filesDir, outDir, [mainArtifacts, artifact.getDefaultGlob(filesDir)])];
+                    return [4 /*yield*/, artifact.importConfigs(filesDir, outDir, artifactsGlob)];
                 case 3:
                     _b.sent();
                     console.log("Build sucessful");
@@ -76,6 +97,10 @@ var io = require("./io");
                     console.log("build - Build the project based on artifact.json files.");
                     console.log("clean - Clean the output directory.");
                     console.log("help - Display help.");
+                    console.log("Optional arguments, these go after the main command:");
+                    console.log("-o -> Specify output folder, defaults to wwwroot. When cleaning this is the folder to be cleaned.");
+                    console.log("-a -> Specify an archive.json file. Can be any filename and supports globbing e.g. node_modules/*/custom-artifacts.json. This argument can appear multiple times. By default this is artifacts.json in the source directory and node_modules/*/artifacts.json.");
+                    console.log("-s -> Specify the source directory. Defaults to the current working directory. All paths are relative to this path.");
                     return [3 /*break*/, 8];
                 case 7:
                     console.log("Unknown command " + process.argv[2]);
