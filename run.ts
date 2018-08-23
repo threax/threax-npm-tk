@@ -1,5 +1,6 @@
 import * as artifact from './artifacts';
 import * as io from './io';
+import * as ts from './typescript';
 var path = require('path');
 
 (async function () {
@@ -53,12 +54,20 @@ var path = require('path');
             case 'help':
                 console.log("build - Build the project based on artifact.json files.");
                 console.log("clean - Clean the output directory.");
+                console.log("tsconfig - Import all the tsimport.json files in your project into your tsconfig.json file. This includes all the top level directories in node_modules and a tsimport.json in the working directory.");
                 console.log("help - Display help.");
                 console.log("Optional arguments, these go after the main command:");
                 console.log("-o -> Specify output folder, defaults to wwwroot. When cleaning this is the folder to be cleaned.");
                 console.log("-a -> Specify an archive.json file. Can be any filename and supports globbing e.g. node_modules/*/custom-artifacts.json. This argument can appear multiple times. By default this is artifacts.json in the source directory and node_modules/*/artifacts.json.");
                 console.log("-s -> Specify the source directory. Defaults to the current working directory. All paths are relative to this path.");
                 console.log("-v -> Verbose output. Use -v true to make it work. Default is false.");
+                break;
+            case 'tsconfig':
+                //Import tsconfig files
+                var projectImport = path.join(filesDir, "tsimport.json");
+                var defaultImport = ts.getDefaultGlob(filesDir);
+                var tsconfig = path.join(filesDir, "tsconfig.json");
+                ts.importConfigs(tsconfig, [projectImport, defaultImport]);
                 break;
             default:
                 console.log("Unknown command " + process.argv[2]);

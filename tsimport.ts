@@ -9,6 +9,8 @@ var path = require('path');
  * there it will load all the top level tsimport.jsons from the node_modules
  * folder. If you need to do something more custom you can import typescript
  * into a custom build folder and use the methods there to import.
+ * 
+ * This is here mostly for backward compatibility now.
  */
 (async function(){
     var cwd = process.cwd();
