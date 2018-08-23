@@ -105,6 +105,7 @@ var path = require('path');
                     console.log("-o -> Specify output folder, defaults to wwwroot. When cleaning this is the folder to be cleaned.");
                     console.log("-a -> Specify an archive.json file. Can be any filename and supports globbing e.g. node_modules/*/custom-artifacts.json. This argument can appear multiple times. By default this is artifacts.json in the source directory and node_modules/*/artifacts.json.");
                     console.log("-s -> Specify the source directory. Defaults to the current working directory. All paths are relative to this path.");
+                    console.log("-v -> Verbose output. Use -v true to make it work. Default is false.");
                     return [3 /*break*/, 8];
                 case 7:
                     console.log("Unknown command " + process.argv[2]);
