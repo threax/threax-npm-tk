@@ -38,6 +38,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 var io = require("./io");
 var copy = require("./copy");
 var less = require("./less");
+var sass = require("./sass");
 var typescript = require("./typescript");
 var jsnsTools = require("./jsnstools");
 var path = require('path');
@@ -63,18 +64,18 @@ function importConfigs(rootPath, outDir, importGlobs, verbose) {
                     i = 0;
                     _a.label = 1;
                 case 1:
-                    if (!(i < importGlobs.length)) return [3 /*break*/, 15];
+                    if (!(i < importGlobs.length)) return [3 /*break*/, 16];
                     return [4 /*yield*/, io.globFiles(importGlobs[i])];
                 case 2:
                     globs = _a.sent();
                     j = 0;
                     _a.label = 3;
                 case 3:
-                    if (!(j < globs.length)) return [3 /*break*/, 14];
+                    if (!(j < globs.length)) return [3 /*break*/, 15];
                     currentGlob = globs[j];
                     _a.label = 4;
                 case 4:
-                    _a.trys.push([4, 12, , 13]);
+                    _a.trys.push([4, 13, , 14]);
                     if (verbose) {
                         console.log("Reading " + currentGlob);
                     }
@@ -88,7 +89,7 @@ function importConfigs(rootPath, outDir, importGlobs, verbose) {
                     j_1 = 0;
                     _a.label = 6;
                 case 6:
-                    if (!(j_1 < imported.length)) return [3 /*break*/, 11];
+                    if (!(j_1 < imported.length)) return [3 /*break*/, 12];
                     currentGlobDir = path.dirname(currentGlob);
                     return [4 /*yield*/, copyFiles(imported[j_1], outDir, currentGlobDir, verbose)];
                 case 7:
@@ -96,25 +97,28 @@ function importConfigs(rootPath, outDir, importGlobs, verbose) {
                     return [4 /*yield*/, compileLess(imported[j_1], outDir, currentGlobDir, verbose)];
                 case 8:
                     _a.sent();
-                    return [4 /*yield*/, compileTypescript(imported[j_1], outDir, currentGlobDir, verbose)];
+                    return [4 /*yield*/, compileSass(imported[j_1], outDir, currentGlobDir, verbose)];
                 case 9:
                     _a.sent();
-                    _a.label = 10;
+                    return [4 /*yield*/, compileTypescript(imported[j_1], outDir, currentGlobDir, verbose)];
                 case 10:
+                    _a.sent();
+                    _a.label = 11;
+                case 11:
                     ++j_1;
                     return [3 /*break*/, 6];
-                case 11: return [3 /*break*/, 13];
-                case 12:
+                case 12: return [3 /*break*/, 14];
+                case 13:
                     err_1 = _a.sent();
                     console.error("Could not load " + currentGlob + "\nReason:" + err_1.message);
                     throw err_1;
-                case 13:
+                case 14:
                     ++j;
                     return [3 /*break*/, 3];
-                case 14:
+                case 15:
                     ++i;
                     return [3 /*break*/, 1];
-                case 15: return [2 /*return*/];
+                case 16: return [2 /*return*/];
             }
         });
     });
@@ -178,6 +182,50 @@ function compileLess(imported, outDir, artifactPath, verbose) {
                 console.log("  Compiling less " + lessOptions.input + " to " + lessOptions.out);
             }
             promises.push(less.compile(lessOptions));
+        }
+    }
+    return Promise.all(promises);
+}
+function compileSass(imported, outDir, artifactPath, verbose) {
+    var promises = [];
+    var basePath = artifactPath;
+    if (imported.pathBase !== undefined) {
+        basePath = path.join(basePath, imported.pathBase);
+    }
+    if (imported.sass) {
+        if (!Array.isArray(imported.sass)) {
+            imported.sass = [imported.sass];
+        }
+        var outputPath = path.join(outDir, imported.outDir);
+        for (var j = 0; j < imported.sass.length; ++j) {
+            var sassOptions = imported.sass[j];
+            if (sassOptions.importPaths !== undefined) {
+                for (var i = 0; i < sassOptions.importPaths.length; ++i) {
+                    sassOptions.importPaths[i] = path.join(artifactPath, sassOptions.importPaths[i]);
+                }
+            }
+            if (sassOptions.input !== undefined) {
+                sassOptions.input = path.join(artifactPath, sassOptions.input);
+            }
+            if (sassOptions.basePath !== undefined) {
+                sassOptions.basePath = path.join(basePath, sassOptions.basePath);
+            }
+            else {
+                sassOptions.basePath = basePath;
+            }
+            if (sassOptions.out !== undefined) {
+                sassOptions.out = path.join(outputPath, sassOptions.out);
+            }
+            else {
+                sassOptions.out = outputPath;
+            }
+            if (sassOptions.encoding === undefined) {
+                sassOptions.encoding = 'utf8';
+            }
+            if (verbose) {
+                console.log("  Compiling sass " + sassOptions.input + " to " + sassOptions.out);
+            }
+            promises.push(sass.compile(sassOptions));
         }
     }
     return Promise.all(promises);

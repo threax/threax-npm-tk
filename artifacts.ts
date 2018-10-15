@@ -1,6 +1,7 @@
 import * as io from './io';
 import * as copy from './copy';
 import * as less from './less';
+import * as sass from './sass';
 import * as typescript from './typescript';
 import * as jsnsTools from './jsnstools';
 var path = require('path');
@@ -23,6 +24,7 @@ interface Artifacts {
     less?: less.LessConfig[];
     ignore?: string | string[];
     typescript?: typescript.TsArtifactOptions;
+    sass?: sass.SassConfig[];
 }
 
 /**
@@ -49,6 +51,7 @@ export async function importConfigs(rootPath: string, outDir: string, importGlob
                     var currentGlobDir = path.dirname(currentGlob);
                     await copyFiles(imported[j], outDir, currentGlobDir, verbose);
                     await compileLess(imported[j], outDir, currentGlobDir, verbose);
+                    await compileSass(imported[j], outDir, currentGlobDir, verbose);
                     await compileTypescript(imported[j], outDir, currentGlobDir, verbose);
                 }
             }
@@ -124,6 +127,55 @@ function compileLess(imported: Artifacts, outDir: string, artifactPath: string, 
             }
 
             promises.push(less.compile(lessOptions));
+        }
+    }
+
+    return Promise.all(promises);
+}
+
+function compileSass(imported: Artifacts, outDir: string, artifactPath: string, verbose: boolean): Promise<any>{
+    var promises = [];
+
+    var basePath = artifactPath;
+    if(imported.pathBase !== undefined){
+        basePath = path.join(basePath, imported.pathBase);
+    }
+    if(imported.sass){
+        if(!Array.isArray(imported.sass)){
+            imported.sass = [imported.sass];
+        }
+        var outputPath = path.join(outDir, imported.outDir);
+        for(let j = 0; j < imported.sass.length; ++j) {
+            var sassOptions = imported.sass[j];
+            if(sassOptions.importPaths !== undefined){
+                for(var i = 0; i < sassOptions.importPaths.length; ++i){
+                    sassOptions.importPaths[i] = path.join(artifactPath, sassOptions.importPaths[i]);
+                }
+            }
+            if(sassOptions.input !== undefined){
+                sassOptions.input = path.join(artifactPath, sassOptions.input);
+            }
+            if(sassOptions.basePath !== undefined){
+                sassOptions.basePath = path.join(basePath, sassOptions.basePath);
+            }
+            else{
+                sassOptions.basePath = basePath;
+            }
+            if(sassOptions.out !== undefined){
+                sassOptions.out = path.join(outputPath, sassOptions.out);
+            }
+            else{
+                sassOptions.out = outputPath;
+            }
+            if(sassOptions.encoding === undefined){
+                sassOptions.encoding = 'utf8';
+            }
+
+            if(verbose){
+                console.log("  Compiling sass " + sassOptions.input + " to " + sassOptions.out);
+            }
+
+            promises.push(sass.compile(sassOptions));
         }
     }
 
