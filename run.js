@@ -41,7 +41,7 @@ var ts = require("./typescript");
 var path = require('path');
 (function () {
     return __awaiter(this, void 0, void 0, function () {
-        var filesDir, outPath, artifactsGlob, verbose, i, outDir, _a, projectImport, defaultImport, tsconfig, err_1;
+        var filesDir, outPath, artifactsGlob, verbose, i, outDir, _a, packageJsonLocation, packageJson, pkg, projectImport, defaultImport, tsconfig, err_1;
         return __generator(this, function (_b) {
             switch (_b.label) {
                 case 0:
@@ -78,28 +78,34 @@ var path = require('path');
                     outDir = path.join(filesDir, outPath);
                     _b.label = 1;
                 case 1:
-                    _b.trys.push([1, 10, , 11]);
+                    _b.trys.push([1, 11, , 12]);
                     _a = process.argv[2];
                     switch (_a) {
                         case 'build': return [3 /*break*/, 2];
                         case 'clean': return [3 /*break*/, 4];
                         case 'help': return [3 /*break*/, 6];
-                        case 'tsconfig': return [3 /*break*/, 7];
+                        case 'tsconfig': return [3 /*break*/, 8];
                     }
-                    return [3 /*break*/, 8];
+                    return [3 /*break*/, 9];
                 case 2:
                     console.log("Building " + filesDir + " to " + outDir);
                     return [4 /*yield*/, artifact.importConfigs(filesDir, outDir, artifactsGlob, verbose)];
                 case 3:
                     _b.sent();
                     console.log("Build sucessful");
-                    return [3 /*break*/, 9];
+                    return [3 /*break*/, 10];
                 case 4: return [4 /*yield*/, io.emptyDir(outDir)];
                 case 5:
                     _b.sent();
                     console.log("Cleaned " + outDir);
-                    return [3 /*break*/, 9];
+                    return [3 /*break*/, 10];
                 case 6:
+                    packageJsonLocation = path.join(__dirname, "package.json");
+                    return [4 /*yield*/, io.readFile(packageJsonLocation)];
+                case 7:
+                    packageJson = _b.sent();
+                    pkg = JSON.parse(packageJson);
+                    console.log("threax-npm-tk version " + pkg.version);
                     console.log("build - Build the project based on artifact.json files.");
                     console.log("clean - Clean the output directory.");
                     console.log("tsconfig - Import all the tsimport.json files in your project into your tsconfig.json file. This includes all the top level directories in node_modules and a tsimport.json in the working directory.");
@@ -109,23 +115,23 @@ var path = require('path');
                     console.log("-a -> Specify an archive.json file. Can be any filename and supports globbing e.g. node_modules/*/custom-artifacts.json. This argument can appear multiple times. By default this is artifacts.json in the source directory and node_modules/*/artifacts.json.");
                     console.log("-s -> Specify the source directory. Defaults to the current working directory. All paths are relative to this path.");
                     console.log("-v -> Verbose output. Use -v true to make it work. Default is false.");
-                    return [3 /*break*/, 9];
-                case 7:
+                    return [3 /*break*/, 10];
+                case 8:
                     projectImport = path.join(filesDir, "tsimport.json");
                     defaultImport = ts.getDefaultGlob(filesDir);
                     tsconfig = path.join(filesDir, "tsconfig.json");
                     ts.importConfigs(tsconfig, [projectImport, defaultImport]);
-                    return [3 /*break*/, 9];
-                case 8:
+                    return [3 /*break*/, 10];
+                case 9:
                     console.log("Unknown command " + process.argv[2]);
-                    return [3 /*break*/, 9];
-                case 9: return [3 /*break*/, 11];
-                case 10:
+                    return [3 /*break*/, 10];
+                case 10: return [3 /*break*/, 12];
+                case 11:
                     err_1 = _b.sent();
                     console.log(JSON.stringify(err_1));
                     process.exit(1);
-                    return [3 /*break*/, 11];
-                case 11: return [2 /*return*/];
+                    return [3 /*break*/, 12];
+                case 12: return [2 /*return*/];
             }
         });
     });
