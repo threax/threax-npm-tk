@@ -41,10 +41,16 @@ var ts = require("./typescript");
 var path = require('path');
 (function () {
     return __awaiter(this, void 0, void 0, function () {
-        var filesDir, outPath, artifactsGlob, verbose, i, outDir, _a, packageJsonLocation, packageJson, pkg, projectImport, defaultImport, tsconfig, err_1;
+        var packageJsonLocation, packageJson, pkg, filesDir, outPath, artifactsGlob, verbose, i, outDir, _a, projectImport, defaultImport, tsconfig, err_1;
         return __generator(this, function (_b) {
             switch (_b.label) {
                 case 0:
+                    packageJsonLocation = path.join(__dirname, "package.json");
+                    return [4 /*yield*/, io.readFile(packageJsonLocation)];
+                case 1:
+                    packageJson = _b.sent();
+                    pkg = JSON.parse(packageJson);
+                    console.log("threax-npm-tk version " + pkg.version);
                     if (process.argv.length < 3) {
                         console.log("You must include a command. Type threax-npm-tk help for help.");
                         process.exit(1);
@@ -76,36 +82,30 @@ var path = require('path');
                         artifactsGlob.push(artifact.getDefaultGlob(filesDir));
                     }
                     outDir = path.join(filesDir, outPath);
-                    _b.label = 1;
-                case 1:
-                    _b.trys.push([1, 11, , 12]);
+                    _b.label = 2;
+                case 2:
+                    _b.trys.push([2, 11, , 12]);
                     _a = process.argv[2];
                     switch (_a) {
-                        case 'build': return [3 /*break*/, 2];
-                        case 'clean': return [3 /*break*/, 4];
-                        case 'help': return [3 /*break*/, 6];
+                        case 'build': return [3 /*break*/, 3];
+                        case 'clean': return [3 /*break*/, 5];
+                        case 'help': return [3 /*break*/, 7];
                         case 'tsconfig': return [3 /*break*/, 8];
                     }
                     return [3 /*break*/, 9];
-                case 2:
+                case 3:
                     console.log("Building " + filesDir + " to " + outDir);
                     return [4 /*yield*/, artifact.importConfigs(filesDir, outDir, artifactsGlob, verbose)];
-                case 3:
+                case 4:
                     _b.sent();
                     console.log("Build sucessful");
                     return [3 /*break*/, 10];
-                case 4: return [4 /*yield*/, io.emptyDir(outDir)];
-                case 5:
+                case 5: return [4 /*yield*/, io.emptyDir(outDir)];
+                case 6:
                     _b.sent();
                     console.log("Cleaned " + outDir);
                     return [3 /*break*/, 10];
-                case 6:
-                    packageJsonLocation = path.join(__dirname, "package.json");
-                    return [4 /*yield*/, io.readFile(packageJsonLocation)];
                 case 7:
-                    packageJson = _b.sent();
-                    pkg = JSON.parse(packageJson);
-                    console.log("threax-npm-tk version " + pkg.version);
                     console.log("build - Build the project based on artifact.json files.");
                     console.log("clean - Clean the output directory.");
                     console.log("tsconfig - Import all the tsimport.json files in your project into your tsconfig.json file. This includes all the top level directories in node_modules and a tsimport.json in the working directory.");

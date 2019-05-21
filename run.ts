@@ -4,6 +4,12 @@ import * as ts from './typescript';
 var path = require('path');
 
 (async function () {
+    //Print version number
+    var packageJsonLocation = path.join(__dirname, "package.json");
+    var packageJson = await io.readFile(packageJsonLocation);
+    var pkg = JSON.parse(packageJson);
+    console.log("threax-npm-tk version " + pkg.version);
+
     if(process.argv.length < 3){
         console.log("You must include a command. Type threax-npm-tk help for help.");
         process.exit(1);
@@ -52,10 +58,6 @@ var path = require('path');
                 console.log("Cleaned " + outDir);
                 break;
             case 'help':
-                var packageJsonLocation = path.join(__dirname, "package.json");
-                var packageJson = await io.readFile(packageJsonLocation);
-                var pkg = JSON.parse(packageJson);
-                console.log("threax-npm-tk version " + pkg.version);
                 console.log("build - Build the project based on artifact.json files.");
                 console.log("clean - Clean the output directory.");
                 console.log("tsconfig - Import all the tsimport.json files in your project into your tsconfig.json file. This includes all the top level directories in node_modules and a tsimport.json in the working directory.");
