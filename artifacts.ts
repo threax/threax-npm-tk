@@ -4,6 +4,7 @@ import * as less from './less';
 import * as sass from './sass';
 import * as typescript from './typescript';
 import * as jsnsTools from './jsnstools';
+import * as bundle from './bundle';
 var path = require('path');
 
 const defaultGlob = "node_modules/*/artifacts.json";
@@ -25,6 +26,7 @@ interface Artifacts {
     ignore?: string | string[];
     typescript?: typescript.TsArtifactOptions;
     sass?: sass.SassConfig[];
+    bundle?: bundle.BundleConfig[];
 }
 
 /**
@@ -34,6 +36,7 @@ export async function importConfigs(rootPath: string, outDir: string, importGlob
     var json: string;
     var imported: Artifacts[];
 
+    //Do primary builds
     for (let i = 0; i < importGlobs.length; ++i) {
         var globs = await io.globFiles(importGlobs[i]);
         for (let j = 0; j < globs.length; ++j) {
@@ -57,6 +60,32 @@ export async function importConfigs(rootPath: string, outDir: string, importGlob
             }
             catch (err) {
                 console.error("Could not load " + currentGlob + "\nReason:" + err.message);
+                throw err;
+            }
+        }
+    }
+
+    //Then bundle
+    for (let i = 0; i < importGlobs.length; ++i) {
+        var globs = await io.globFiles(importGlobs[i]);
+        for (let j = 0; j < globs.length; ++j) {
+            let currentGlob = globs[j];
+            try {
+                if(verbose){
+                    console.log("Bundling " + currentGlob);
+                }
+                json = await io.readFile(currentGlob);
+                imported = JSON.parse(json);
+                if(!Array.isArray(imported)){
+                    imported = [imported];
+                }
+                for(let j = 0; j < imported.length; ++j){
+                    var currentGlobDir = path.dirname(currentGlob);
+                    await compileBundle(imported[j], outDir, currentGlobDir, verbose);
+                }
+            }
+            catch (err) {
+                console.error("Could not load " + currentGlob + "\nReason:" + err.message + "\Stack:" + err.stack);
                 throw err;
             }
         }
@@ -226,4 +255,50 @@ async function compileTypescript(imported: Artifacts, outDir: string, artifactPa
             await jsnsTools.saveLoadedModules(tscOutputFile, imported.typescript.shakeModules.runners, shakenOutputFile);
         }
     }
+}
+
+function compileBundle(imported: Artifacts, outDir: string, artifactPath: string, verbose: boolean): Promise<any>{
+    var promises = [];
+
+    var basePath = artifactPath;
+    if(imported.pathBase !== undefined){
+        basePath = path.join(basePath, imported.pathBase);
+    }
+    if(imported.bundle){
+        if(!Array.isArray(imported.bundle)){
+            imported.bundle = [imported.bundle];
+        }
+        var outputPath = path.join(outDir, imported.outDir);
+        for(let j = 0; j < imported.bundle.length; ++j) {
+            var bundleOptions = imported.bundle[j];
+            if(bundleOptions.input !== undefined){
+                for(let k = 0; k < bundleOptions.input.length; ++k){
+                    bundleOptions.input[k] = path.join(artifactPath, bundleOptions.input[k]);
+                }
+            }
+            if(bundleOptions.basePath !== undefined){
+                bundleOptions.basePath = path.join(basePath, bundleOptions.basePath);
+            }
+            else{
+                bundleOptions.basePath = basePath;
+            }
+            if(bundleOptions.out !== undefined){
+                bundleOptions.out = path.join(outputPath, bundleOptions.out);
+            }
+            else{
+                bundleOptions.out = outputPath;
+            }
+            if(bundleOptions.encoding === undefined){
+                bundleOptions.encoding = 'utf8';
+            }
+
+            if(verbose){
+                console.log("  Compiling bundle " + bundleOptions.input + " to " + bundleOptions.out);
+            }
+
+            promises.push(bundle.compile(bundleOptions));
+        }
+    }
+
+    return Promise.all(promises);
 }

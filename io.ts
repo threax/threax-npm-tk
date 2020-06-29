@@ -82,9 +82,14 @@ export function copy(src: string, dest: string){
     return ep.Promise;
 }
 
-export function readFile(path: string): Promise<any>{
+export interface ReadFileOptions {
+    encoding?: string;
+    flag?: string;
+}
+
+export function readFile(path: string, options?: ReadFileOptions | string): Promise<any>{
     var ep = new ExternalPromise();
-    fs.readFile(path, (err, data) => {
+    fs.readFile(path, options, (err, data) => {
         if (err){ return ep.reject(err); }
         ep.resolve(data);
     });
@@ -101,11 +106,34 @@ export function writeFile(path: string, data: any){
     return ep.Promise;
 }
 
+export function appendFile(path: string, data: any){
+    var ep = new ExternalPromise();
+    fs.appendFile(path, data, 
+        (err) => {
+            if (err){ return ep.reject(err); }
+            ep.resolve();
+        });
+    return ep.Promise;
+}
+
 export function emptyDir(path: string): Promise<any>{
     var ep = new ExternalPromise();
     fs.emptyDir(path, (err, data) => {
         if (err){ return ep.reject(err); }
         ep.resolve(data);
+    });
+    return ep.Promise;
+}
+
+/**
+ * Delete a file
+ * @param path the path to the file to delete.
+ */
+export function unlinkFile(path: string): Promise<unknown>{
+    var ep = new ExternalPromise();
+    fs.unlink(path, (err) => {
+        if (err){ return ep.reject(err); }
+        ep.resolve();
     });
     return ep.Promise;
 }

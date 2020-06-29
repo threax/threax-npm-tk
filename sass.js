@@ -1,7 +1,7 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.compile = void 0;
-var externalPromise_1 = require("./externalPromise");
+const externalPromise_1 = require("./externalPromise");
 var sass = require('node-sass');
 var fs = require('fs-extra');
 var Glob = require("glob").Glob;
@@ -12,7 +12,7 @@ function compile(settings) {
         return ep.reject(new Error("Cannot find basePath setting when compiling sass for " + settings.input));
     }
     var basePath = path.join(settings.basePath);
-    var mg = new Glob(settings.input, {}, function (err, files) {
+    var mg = new Glob(settings.input, {}, (err, files) => {
         if (err) {
             ep.reject(err);
         }
@@ -26,10 +26,10 @@ function compile(settings) {
                 compilePromises.push(compileFile(settings, file, outFile));
             }
             Promise.all(compilePromises)
-                .then(function (r) {
+                .then(r => {
                 ep.resolve();
             })
-                .catch(function (err) {
+                .catch(err => {
                 ep.reject(err);
             });
         }
@@ -42,22 +42,22 @@ function compile(settings) {
 exports.compile = compile;
 function compileFile(settings, inFile, outFile) {
     var ep = new externalPromise_1.ExternalPromise();
-    fs.readFile(inFile, settings.encoding, function (err, data) {
+    fs.readFile(inFile, settings.encoding, (err, data) => {
         if (err) {
             return ep.reject(err);
         }
         sass.render({
             data: data,
             includePaths: settings.importPaths
-        }, function (err, output) {
+        }, (err, output) => {
             if (err) {
                 return ep.reject(err);
             }
-            fs.ensureFile(outFile, function (err) {
+            fs.ensureFile(outFile, (err) => {
                 if (err) {
                     return ep.reject(err);
                 }
-                fs.writeFile(outFile, output.css, function (err) {
+                fs.writeFile(outFile, output.css, (err) => {
                     if (err) {
                         return ep.reject(err);
                     }
