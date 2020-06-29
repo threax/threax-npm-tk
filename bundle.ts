@@ -1,4 +1,5 @@
 ﻿import * as io from './io';
+import * as sass from './sass';
 
 var Terser = require("terser");
 var fs = require('fs-extra');
@@ -32,6 +33,13 @@ export async function compile(settings: BundleConfig): Promise<any> {
         }
     };
 
+    let ext = path.extname(settings.out).toLowerCase();
+    let isJs = ext.endsWith(".js");
+    let isCss = ext.endsWith(".css");
+    if(settings.minify && !isJs && !isCss) {
+        throw new Error(`Cannot determine if output file ${settings.out} is a javascript or css file and minification is turned on. Canceling bundle since output format cannot be determined.`)
+    }
+
     try {
     await io.unlinkFile(settings.out);
     }
@@ -41,17 +49,27 @@ export async function compile(settings: BundleConfig): Promise<any> {
     await io.ensureFile(settings.out);
     for(let i = 0; i < settings.input.length; ++i){
         let input = settings.input[i];
-
         let file = path.join(input);
+
         let data = await io.readFile(file, {encoding: settings.encoding});
         let lineEnding = io.getLineEndings(data);
 
         if(settings.minify) {
-            let terserResult = Terser.minify(data, terserOptions);
-            if(terserResult.error){
-                throw terserResult.error;
+            if(isJs) {
+                let terserResult = Terser.minify(data, terserOptions);
+                if(terserResult.error){
+                    throw terserResult.error;
+                }
+                data = terserResult.code;
             }
-            data = terserResult.code;
+
+            if(isCss) {
+                var sassResult = await sass.compileSassPromise({
+                    data: data,
+                    outputStyle: "compressed"
+                });
+                data = sassResult.css;
+            }
         }
         await io.appendFile(settings.out, data + lineEnding);
     }

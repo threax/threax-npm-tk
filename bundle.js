@@ -11,6 +11,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.compile = void 0;
 const io = require("./io");
+const sass = require("./sass");
 var Terser = require("terser");
 var fs = require('fs-extra');
 var Glob = require("glob").Glob;
@@ -27,6 +28,12 @@ function compile(settings) {
                 reserved: ["jsns"]
             }
         };
+        let ext = path.extname(settings.out).toLowerCase();
+        let isJs = ext.endsWith(".js");
+        let isCss = ext.endsWith(".css");
+        if (settings.minify && !isJs && !isCss) {
+            throw new Error(`Cannot determine if output file ${settings.out} is a javascript or css file and minification is turned on. Canceling bundle since output format cannot be determined.`);
+        }
         try {
             yield io.unlinkFile(settings.out);
         }
@@ -40,11 +47,20 @@ function compile(settings) {
             let data = yield io.readFile(file, { encoding: settings.encoding });
             let lineEnding = io.getLineEndings(data);
             if (settings.minify) {
-                let terserResult = Terser.minify(data, terserOptions);
-                if (terserResult.error) {
-                    throw terserResult.error;
+                if (isJs) {
+                    let terserResult = Terser.minify(data, terserOptions);
+                    if (terserResult.error) {
+                        throw terserResult.error;
+                    }
+                    data = terserResult.code;
                 }
-                data = terserResult.code;
+                if (isCss) {
+                    var sassResult = yield sass.compileSassPromise({
+                        data: data,
+                        outputStyle: "compressed"
+                    });
+                    data = sassResult.css;
+                }
             }
             yield io.appendFile(settings.out, data + lineEnding);
         }

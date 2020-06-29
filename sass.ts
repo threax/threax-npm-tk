@@ -1,4 +1,5 @@
 ﻿import {ExternalPromise} from './externalPromise';
+import * as io from './io';
 
 var sass = require('node-sass');
 var fs = require('fs-extra');
@@ -53,30 +54,37 @@ export function compile(settings: SassConfig) {
     return ep.Promise;
 }
 
-function compileFile(settings, inFile, outFile){
-    var ep = new ExternalPromise();
-
-    fs.readFile(inFile, settings.encoding, (err, data) => {
-        if (err){ return ep.reject(err); }
-
-        sass.render(
-            {
-                data: data,
-                includePaths: settings.importPaths
-            },
-            (err, output) => {
-                if (err){ return ep.reject(err); }
-                fs.ensureFile(outFile, 
-                    (err) => {
-                        if (err){ return ep.reject(err); }
-                        fs.writeFile(outFile, output.css, 
-                            (err) => {
-                                if (err){ return ep.reject(err); }
-                                ep.resolve();
-                            });
-                    });
-            });
+async function compileFile(settings, inFile, outFile){
+    var data = await io.readFile(inFile, { encoding: settings.encoding });
+    var output = await compileSassPromise({
+        data: data,
+        includePaths: settings.importPaths
     });
+    await io.ensureFile(outFile);
+    await io.writeFile(outFile, output.css);
+}
+
+export interface SassSettings{
+    data?: string;
+    includePaths?: string[];
+    outputStyle?: "nested" | "expanded" | "compact" | "compressed";
+}
+
+export interface SassResult{
+    css?: string;
+}
+
+export function compileSassPromise(options: SassSettings): Promise<SassResult> {
+    let ep = new ExternalPromise<SassResult>();
+    sass.render(options,
+        (err, output) => {
+            if (err) {
+                 return ep.reject(err); 
+            }
+            else {
+                ep.resolve(output);
+            }
+        });
 
     return ep.Promise;
 }

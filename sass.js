@@ -1,7 +1,17 @@
 "use strict";
+var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
+    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
+    return new (P || (P = Promise))(function (resolve, reject) {
+        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
+        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
+        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
+        step((generator = generator.apply(thisArg, _arguments || [])).next());
+    });
+};
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.compile = void 0;
+exports.compileSassPromise = exports.compile = void 0;
 const externalPromise_1 = require("./externalPromise");
+const io = require("./io");
 var sass = require('node-sass');
 var fs = require('fs-extra');
 var Glob = require("glob").Glob;
@@ -41,31 +51,27 @@ function compile(settings) {
 }
 exports.compile = compile;
 function compileFile(settings, inFile, outFile) {
-    var ep = new externalPromise_1.ExternalPromise();
-    fs.readFile(inFile, settings.encoding, (err, data) => {
+    return __awaiter(this, void 0, void 0, function* () {
+        var data = yield io.readFile(inFile, { encoding: settings.encoding });
+        var output = yield compileSassPromise({
+            data: data,
+            includePaths: settings.importPaths
+        });
+        yield io.ensureFile(outFile);
+        yield io.writeFile(outFile, output.css);
+    });
+}
+function compileSassPromise(options) {
+    let ep = new externalPromise_1.ExternalPromise();
+    sass.render(options, (err, output) => {
         if (err) {
             return ep.reject(err);
         }
-        sass.render({
-            data: data,
-            includePaths: settings.importPaths
-        }, (err, output) => {
-            if (err) {
-                return ep.reject(err);
-            }
-            fs.ensureFile(outFile, (err) => {
-                if (err) {
-                    return ep.reject(err);
-                }
-                fs.writeFile(outFile, output.css, (err) => {
-                    if (err) {
-                        return ep.reject(err);
-                    }
-                    ep.resolve();
-                });
-            });
-        });
+        else {
+            ep.resolve(output);
+        }
     });
     return ep.Promise;
 }
+exports.compileSassPromise = compileSassPromise;
 //# sourceMappingURL=sass.js.map
