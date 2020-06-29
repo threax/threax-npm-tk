@@ -1,5 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
+exports.compile = void 0;
 var externalPromise_1 = require("./externalPromise");
 var lessc = require('less');
 var fs = require('fs-extra');

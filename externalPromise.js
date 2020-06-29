@@ -1,5 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
+exports.ExternalPromise = void 0;
 /**
  * This is a wrapper for a promise that exposes the resolve
  * and reject functions.
@@ -22,7 +23,7 @@ var ExternalPromise = /** @class */ (function () {
         get: function () {
             return this._promise;
         },
-        enumerable: true,
+        enumerable: false,
         configurable: true
     });
     return ExternalPromise;
