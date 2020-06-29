@@ -13,5 +13,12 @@
   "devDependencies": {
     "@types/node": ">=14.0.14"
   },
-  "bin": "./bin/threax-npm-tk"
+  "bin": "./bin/threax-npm-tk",
+  "files": [
+    "*.js",
+    "*.ts",
+    "LICENSE",
+    "Readme.md",
+    "bin/**/*"
+  ]
 }
