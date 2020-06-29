@@ -21,11 +21,6 @@ Run the program with `threax-npm-tk` here are the example tasks from a framework
 "import-tsconfig": "threax-npm-tk tsconfig"
 ```
 
-## Building
-To build run tsc in the root directory. This will update all the javascript files.
-
-To test the local results run `node .\run.js` to run the program.
-
 ## Artifacts.json
 This file describes how to copy files in a project. A typical project comes with a file that looks like the following:
 ```
@@ -45,3 +40,11 @@ This file describes how to copy files in a project. A typical project comes with
 ]
 ```
 This tells the artifacts system to build the local typescript config and to copy any images from the Client/Images folder. This only describes the resources for the current project. For other modules each npm package will have an artifacts.json file that is scanned for during build. The combined output of all of these files will be written to the output directories. This makes it easy to pull in dependencies without needing to modify a ton of config files.
+
+## Development
+
+### Building
+To build run `tsc` in the root directory. This will update all the javascript files.
+
+### Running Local Copy
+To test the local results run `node .\run.js` to run the program.
