@@ -137,3 +137,19 @@ export function unlinkFile(path: string): Promise<unknown>{
     });
     return ep.Promise;
 }
+
+export function getLineEndings(data: string, noEndingsMode?: string) {
+    if(noEndingsMode === undefined) {
+        noEndingsMode = "\n";
+    }
+    
+    if(data.search(/\r/) > -1 || data.search(/\r\n/) > -1) {
+        return "\r\n";
+    } 
+    else if(data.search(/\n/) > -1) {
+        return "\n";
+    } 
+    else {
+        return noEndingsMode;
+    }
+}

@@ -9,7 +9,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.unlinkFile = exports.emptyDir = exports.appendFile = exports.writeFile = exports.readFile = exports.copy = exports.ensureDir = exports.ensureFile = exports.globFiles = exports.fsstat = void 0;
+exports.getLineEndings = exports.unlinkFile = exports.emptyDir = exports.appendFile = exports.writeFile = exports.readFile = exports.copy = exports.ensureDir = exports.ensureFile = exports.globFiles = exports.fsstat = void 0;
 var fs = require('fs-extra');
 var Glob = require("glob").Glob;
 const externalPromise_1 = require("./externalPromise");
@@ -148,4 +148,19 @@ function unlinkFile(path) {
     return ep.Promise;
 }
 exports.unlinkFile = unlinkFile;
+function getLineEndings(data, noEndingsMode) {
+    if (noEndingsMode === undefined) {
+        noEndingsMode = "\n";
+    }
+    if (data.search(/\r/) > -1 || data.search(/\r\n/) > -1) {
+        return "\r\n";
+    }
+    else if (data.search(/\n/) > -1) {
+        return "\n";
+    }
+    else {
+        return noEndingsMode;
+    }
+}
+exports.getLineEndings = getLineEndings;
 //# sourceMappingURL=io.js.map

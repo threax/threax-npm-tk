@@ -21,9 +21,11 @@ function compile(settings) {
             throw new Error("Cannot find basePath setting when compiling bundle for " + settings.input);
         }
         var terserOptions = {
-            toplevel: true,
+            toplevel: false,
             compress: true,
-            mangle: true
+            mangle: {
+                reserved: ["jsns"]
+            }
         };
         try {
             yield io.unlinkFile(settings.out);
@@ -34,8 +36,9 @@ function compile(settings) {
         yield io.ensureFile(settings.out);
         for (let i = 0; i < settings.input.length; ++i) {
             let input = settings.input[i];
-            var file = path.join(input);
-            var data = yield io.readFile(file, { encoding: settings.encoding });
+            let file = path.join(input);
+            let data = yield io.readFile(file, { encoding: settings.encoding });
+            let lineEnding = io.getLineEndings(data);
             if (settings.minify) {
                 let terserResult = Terser.minify(data, terserOptions);
                 if (terserResult.error) {
@@ -43,7 +46,7 @@ function compile(settings) {
                 }
                 data = terserResult.code;
             }
-            yield io.appendFile(settings.out, data);
+            yield io.appendFile(settings.out, data + lineEnding);
         }
     });
 }

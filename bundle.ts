@@ -25,9 +25,11 @@ export async function compile(settings: BundleConfig): Promise<any> {
     }
 
     var terserOptions = {
-        toplevel: true,
+        toplevel: false,
         compress: true,
-        mangle: true
+        mangle: {
+            reserved: ["jsns"]
+        }
     };
 
     try {
@@ -40,8 +42,10 @@ export async function compile(settings: BundleConfig): Promise<any> {
     for(let i = 0; i < settings.input.length; ++i){
         let input = settings.input[i];
 
-        var file = path.join(input);
-        var data = await io.readFile(file, {encoding: settings.encoding});
+        let file = path.join(input);
+        let data = await io.readFile(file, {encoding: settings.encoding});
+        let lineEnding = io.getLineEndings(data);
+
         if(settings.minify) {
             let terserResult = Terser.minify(data, terserOptions);
             if(terserResult.error){
@@ -49,6 +53,6 @@ export async function compile(settings: BundleConfig): Promise<any> {
             }
             data = terserResult.code;
         }
-        await io.appendFile(settings.out, data);
+        await io.appendFile(settings.out, data + lineEnding);
     }
 }
