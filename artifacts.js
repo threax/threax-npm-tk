@@ -208,15 +208,18 @@ function compileTypescript(imported, outDir, artifactPath, verbose) {
                     projectFolder: artifactPath
                 });
             }
+            if (imported.typescript.copyToJsModules && imported.typescript.shakeModules) {
+                throw new Error("You cannot turn on both copyToJsModules and shakeModules when compiling Typescript.");
+            }
             if (imported.typescript.shakeModules) {
                 //Try to load the tsconfig from the artifact path. This will determine the input file
-                var tscOutputFile;
-                var json = yield io.readFile(artifactPath + '/tsconfig.json');
-                var tsConfig = JSON.parse(json);
+                let tscOutputFile;
+                let json = yield io.readFile(artifactPath + '/tsconfig.json');
+                let tsConfig = JSON.parse(json);
                 if (tsConfig.compilerOptions && tsConfig.compilerOptions.outFile) {
                     tscOutputFile = tsConfig.compilerOptions.outFile;
                 }
-                var shakenOutputFile;
+                let shakenOutputFile;
                 //If the artifacts file defines a shake output file, use that path following the defined paths in the artifacts.json file
                 if (imported.typescript.shakeModules.outFile) {
                     shakenOutputFile = path.join(imported.outDir, imported.typescript.shakeModules.outFile);
@@ -225,8 +228,8 @@ function compileTypescript(imported, outDir, artifactPath, verbose) {
                 else {
                     //Discover location of typescript output, use that path unless an outfile is specified in the shake options
                     //Typescript outputs using the tsconfig settings, so we use artifactPath here.
-                    var tscOutPath = path.dirname(tscOutputFile);
-                    var shakenFile = path.basename(tscOutputFile, '.js') + ".shake.js";
+                    let tscOutPath = path.dirname(tscOutputFile);
+                    let shakenFile = path.basename(tscOutputFile, '.js') + ".shake.js";
                     shakenOutputFile = path.join(artifactPath, tscOutPath, shakenFile);
                 }
                 //Scope to output path
@@ -235,6 +238,51 @@ function compileTypescript(imported, outDir, artifactPath, verbose) {
                     console.log('  Shaking jsns modules from ' + tscOutputFile + ' to ' + shakenOutputFile);
                 }
                 yield jsnsTools.saveLoadedModules(tscOutputFile, imported.typescript.shakeModules.runners, shakenOutputFile);
+            }
+            if (imported.typescript.copyToJsModules) {
+                let json = yield io.readFile(artifactPath + '/tsconfig.json');
+                let tsConfig = JSON.parse(json);
+                if (!tsConfig.compilerOptions) {
+                    throw new Error("Your tsconfig.json file must have a compilerOptions section set to use copyToJsModules");
+                }
+                let tsOutDir = tsConfig.compilerOptions.outDir;
+                if (!tsOutDir) {
+                    throw new Error("Your tsconfig.json file must have a compilerOptions.outDir value set to use copyToJsModules");
+                }
+                let finalDir = imported.outDir;
+                if (finalDir) {
+                    finalDir = path.join(outDir, finalDir);
+                }
+                else {
+                    //Use the ts out dir as the final dir if one was not specified.
+                    //This is just relative to the artifact path since that is how the tsconfig will work
+                    finalDir = path.join(artifactPath, tsOutDir);
+                }
+                tsOutDir = path.join(artifactPath, tsOutDir);
+                let paths = tsConfig.compilerOptions.paths;
+                if (!paths) {
+                    throw new Error("Your tsconfig.json file must have a compilerOptions.paths value set to use copyToJsModules");
+                }
+                yield io.ensureDir(finalDir);
+                //Copy all files specified in paths renaming them to match the namespaced name.
+                for (let key in paths) {
+                    let current = paths[key];
+                    let baseName = key.substr(0, key.length - 1);
+                    for (let i = 0; i < current.length; ++i) {
+                        let lookup = path.join(tsOutDir, current[i]);
+                        let globs = yield io.globFiles(lookup);
+                        if (verbose) {
+                            console.log(`Copying javascript modules from: ${lookup} to ${finalDir} with baseName: ${baseName}`);
+                        }
+                        for (let j = 0; j < globs.length; ++j) {
+                            let source = globs[j];
+                            let dest = path.join(finalDir, baseName + path.basename(source));
+                            yield io.rename(source, dest);
+                        }
+                    }
+                }
+                //Copy all remaining files
+                copy.dir(tsOutDir, finalDir);
             }
         }
     });

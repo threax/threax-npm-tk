@@ -153,3 +153,13 @@ export function getLineEndings(data: string, noEndingsMode?: string) {
         return noEndingsMode;
     }
 }
+
+export function rename(oldPath: string, newPath: string){
+    var ep = new ExternalPromise();
+    fs.rename(oldPath, newPath, 
+        (err) => {
+            if (err){ return ep.reject(err); }
+            ep.resolve();
+        });
+    return ep.Promise;
+}

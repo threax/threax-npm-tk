@@ -12,6 +12,13 @@ export interface ShakeModulesOptions {
 export interface TsArtifactOptions {
     compile: boolean;
     shakeModules: ShakeModulesOptions;
+
+    /**
+     * Set this to true to copy output js file to the names they would have based on their import path remappings.
+     * This doesn't really work since typescript still puts out absolute paths. Need to change them to relative somehow.
+     * The directory structure would work in that case.
+     */
+    copyToJsModules: boolean;
 }
 
 export interface TypescriptOptions {
