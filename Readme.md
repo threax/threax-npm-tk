@@ -7,7 +7,7 @@ Ideally install this as a global package.
 
 Run `npm install -g threax-npm-tk` to install.
 
-You probably also want typescript `npm install -g typescript`.
+You probably also want typescript `npm install -g typescript` and sass `npm install -g sass`.
 
 ### Project
 You can also install the toolkit in your project by adding threax-npm-tk to devDependencies in the package.json file in your repo. This will then override any calls to threax-npm-tk to your locally installed copy. While backward compatibility is a big part of the toolkit this can help you fix a problematic program that can't be updated right away. However, due to bloat in the node_modules directory this should be avoided if possible.
