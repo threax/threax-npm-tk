@@ -6,7 +6,6 @@ var Glob = require("glob").Glob;
 var path = require('path');
 
 export interface SassConfig {
-    encoding: string;
     importPaths: string[];
     input: string;
     basePath: string;
@@ -76,7 +75,7 @@ interface ExecOptions{
 export function compileSassPromise(options: SassSettings): Promise<void> {
     var execOptions: ExecOptions = {};
 
-    var command = 'sass ';
+    var command = 'sass --no-source-map ';
     if(options.includePaths){
         for(let i = 0; i < options.includePaths.length; ++i){
             var item = options.includePaths[i];

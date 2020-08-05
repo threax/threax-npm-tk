@@ -140,9 +140,6 @@ function compileSass(imported, outDir, artifactPath, verbose) {
             else {
                 sassOptions.out = outputPath;
             }
-            if (sassOptions.encoding === undefined) {
-                sassOptions.encoding = 'utf8';
-            }
             if (verbose) {
                 console.log("  Compiling sass " + sassOptions.input + " to " + sassOptions.out);
             }

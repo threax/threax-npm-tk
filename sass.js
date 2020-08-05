@@ -60,7 +60,7 @@ function compileFile(settings, inFile, outFile) {
 }
 function compileSassPromise(options) {
     var execOptions = {};
-    var command = 'sass ';
+    var command = 'sass --no-source-map ';
     if (options.includePaths) {
         for (let i = 0; i < options.includePaths.length; ++i) {
             var item = options.includePaths[i];

@@ -11,6 +11,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.compile = void 0;
 const io = require("./io");
+const sass = require("./sass");
 var Terser = require("terser");
 var fs = require('fs-extra');
 var Glob = require("glob").Glob;
@@ -43,10 +44,10 @@ function compile(settings) {
         for (let i = 0; i < settings.input.length; ++i) {
             let input = settings.input[i];
             let file = path.join(input);
-            let data = yield io.readFile(file, { encoding: settings.encoding });
-            let lineEnding = io.getLineEndings(data);
+            let data;
             if (settings.minify) {
                 if (isJs) {
+                    data = yield io.readFile(file, { encoding: settings.encoding });
                     let terserResult = Terser.minify(data, terserOptions);
                     if (terserResult.error) {
                         throw terserResult.error;
@@ -54,9 +55,17 @@ function compile(settings) {
                     data = terserResult.code;
                 }
                 if (isCss) {
-                    //Do nothing right now
+                    var outFile = file + ".threax-npm-tk";
+                    var sassResult = yield sass.compileSassPromise({
+                        input: file,
+                        output: outFile,
+                        outputStyle: "compressed"
+                    });
+                    data = yield io.readFile(outFile, { encoding: settings.encoding });
+                    yield io.unlinkFile(outFile);
                 }
             }
+            let lineEnding = io.getLineEndings(data);
             yield io.appendFile(settings.out, data + lineEnding);
         }
     });

@@ -50,12 +50,12 @@ export async function compile(settings: BundleConfig): Promise<any> {
     for(let i = 0; i < settings.input.length; ++i){
         let input = settings.input[i];
         let file = path.join(input);
-
-        let data = await io.readFile(file, {encoding: settings.encoding});
-        let lineEnding = io.getLineEndings(data);
+        let data: string;
 
         if(settings.minify) {
             if(isJs) {
+                data = await io.readFile(file, {encoding: settings.encoding});
+
                 let terserResult = Terser.minify(data, terserOptions);
                 if(terserResult.error){
                     throw terserResult.error;
@@ -64,9 +64,17 @@ export async function compile(settings: BundleConfig): Promise<any> {
             }
 
             if(isCss) {
-                //Do nothing right now
+                var outFile = file + ".threax-npm-tk";
+                var sassResult = await sass.compileSassPromise({
+                    input: file,
+                    output: outFile,
+                    outputStyle: "compressed"
+                });
+                data = await io.readFile(outFile, {encoding: settings.encoding});
+                await io.unlinkFile(outFile);
             }
         }
+        let lineEnding = io.getLineEndings(data);
         await io.appendFile(settings.out, data + lineEnding);
     }
 }
