@@ -64,11 +64,7 @@ export async function compile(settings: BundleConfig): Promise<any> {
             }
 
             if(isCss) {
-                var sassResult = await sass.compileSassPromise({
-                    data: data,
-                    outputStyle: "compressed"
-                });
-                data = sassResult.css;
+                //Do nothing right now
             }
         }
         await io.appendFile(settings.out, data + lineEnding);

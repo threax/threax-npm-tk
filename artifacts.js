@@ -12,7 +12,6 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.importConfigs = exports.getDefaultGlob = void 0;
 const io = require("./io");
 const copy = require("./copy");
-const less = require("./less");
 const sass = require("./sass");
 const typescript = require("./typescript");
 const jsnsTools = require("./jsnstools");
@@ -52,7 +51,6 @@ function importConfigs(rootPath, outDir, importGlobs, verbose) {
                     for (let j = 0; j < imported.length; ++j) {
                         var currentGlobDir = path.dirname(currentGlob);
                         yield copyFiles(imported[j], outDir, currentGlobDir, verbose);
-                        yield compileLess(imported[j], outDir, currentGlobDir, verbose);
                         yield compileSass(imported[j], outDir, currentGlobDir, verbose);
                         yield compileTypescript(imported[j], outDir, currentGlobDir, verbose);
                     }
@@ -105,50 +103,6 @@ function copyFiles(imported, outDir, artifactPath, verbose) {
                 console.log("  Copying files " + full + " to " + outputPath);
             }
             promises.push(copy.glob(full, basePath, outputPath, imported.ignore));
-        }
-    }
-    return Promise.all(promises);
-}
-function compileLess(imported, outDir, artifactPath, verbose) {
-    var promises = [];
-    var basePath = artifactPath;
-    if (imported.pathBase !== undefined) {
-        basePath = path.join(basePath, imported.pathBase);
-    }
-    if (imported.less) {
-        if (!Array.isArray(imported.less)) {
-            imported.less = [imported.less];
-        }
-        var outputPath = path.join(outDir, imported.outDir);
-        for (let j = 0; j < imported.less.length; ++j) {
-            var lessOptions = imported.less[j];
-            if (lessOptions.importPaths !== undefined) {
-                for (var i = 0; i < lessOptions.importPaths.length; ++i) {
-                    lessOptions.importPaths[i] = path.join(artifactPath, lessOptions.importPaths[i]);
-                }
-            }
-            if (lessOptions.input !== undefined) {
-                lessOptions.input = path.join(artifactPath, lessOptions.input);
-            }
-            if (lessOptions.basePath !== undefined) {
-                lessOptions.basePath = path.join(basePath, lessOptions.basePath);
-            }
-            else {
-                lessOptions.basePath = basePath;
-            }
-            if (lessOptions.out !== undefined) {
-                lessOptions.out = path.join(outputPath, lessOptions.out);
-            }
-            else {
-                lessOptions.out = outputPath;
-            }
-            if (lessOptions.encoding === undefined) {
-                lessOptions.encoding = 'utf8';
-            }
-            if (verbose) {
-                console.log("  Compiling less " + lessOptions.input + " to " + lessOptions.out);
-            }
-            promises.push(less.compile(lessOptions));
         }
     }
     return Promise.all(promises);

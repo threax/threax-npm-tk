@@ -11,7 +11,6 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.compile = void 0;
 const io = require("./io");
-const sass = require("./sass");
 var Terser = require("terser");
 var fs = require('fs-extra');
 var Glob = require("glob").Glob;
@@ -55,11 +54,7 @@ function compile(settings) {
                     data = terserResult.code;
                 }
                 if (isCss) {
-                    var sassResult = yield sass.compileSassPromise({
-                        data: data,
-                        outputStyle: "compressed"
-                    });
-                    data = sassResult.css;
+                    //Do nothing right now
                 }
             }
             yield io.appendFile(settings.out, data + lineEnding);

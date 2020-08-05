@@ -1,8 +1,7 @@
 ﻿import {ExternalPromise} from './externalPromise';
 import * as io from './io';
 
-var sass = require('node-sass');
-var fs = require('fs-extra');
+var exec = require('child_process').exec;
 var Glob = require("glob").Glob;
 var path = require('path');
 
@@ -55,36 +54,59 @@ export function compile(settings: SassConfig) {
 }
 
 async function compileFile(settings, inFile, outFile){
-    var data = await io.readFile(inFile, { encoding: settings.encoding });
     var output = await compileSassPromise({
-        data: data,
-        includePaths: settings.importPaths
+        input: inFile,
+        output: outFile,
+        includePaths: settings.importPaths,
+        outputStyle: "compressed"
     });
-    await io.ensureFile(outFile);
-    await io.writeFile(outFile, output.css);
 }
 
-export interface SassSettings{
-    data?: string;
+interface SassSettings{
+    input: string;
+    output: string;
     includePaths?: string[];
-    outputStyle?: "nested" | "expanded" | "compact" | "compressed";
+    outputStyle?: "expanded" | "compressed";
 }
 
-export interface SassResult{
-    css?: string;
+interface ExecOptions{
+    cwd?: string;
 }
 
-export function compileSassPromise(options: SassSettings): Promise<SassResult> {
-    let ep = new ExternalPromise<SassResult>();
-    sass.render(options,
-        (err, output) => {
-            if (err) {
-                 return ep.reject(err); 
+export function compileSassPromise(options: SassSettings): Promise<void> {
+    var execOptions: ExecOptions = {};
+
+    var command = 'sass ';
+    if(options.includePaths){
+        for(let i = 0; i < options.includePaths.length; ++i){
+            var item = options.includePaths[i];
+            command += `--load-path=${item} `;
+        }
+    }
+
+    if(options.outputStyle){
+        command += `--style=${options.outputStyle} `;
+    }
+
+    command += `${options.input} ${options.output}`;
+    //console.log(command);
+
+    var ep = new ExternalPromise<void>();
+    var child = exec(command, execOptions,
+        function (error, stdout, stderr) {
+            if (stdout) {
+                console.log('sass: ' + stdout);
             }
-            else {
-                ep.resolve(output);
+            if (stderr) {
+                console.log('sass error: ' + stderr);
+            }
+            if (error !== null) {
+                console.log('sass exec error: ' + error);
+                ep.reject(error);
+            }
+            else{
+                ep.resolve();
             }
         });
-
     return ep.Promise;
 }
